@@ -1,9 +1,15 @@
 # Проверка активированных окружений Conda
+param (
+    [string]$VirtualenvsDirectory = "C:\Users\user\.virtualenvs",
+    [bool]$FreezeDependencies = $true
+)
+
 function Check-CondaEnvs {
     try {
         $envs = (conda env list --json | ConvertFrom-Json).envs
         $result = @()
         foreach ($env in $envs) {
+            # Write-Host "Scanning Conda env: $env"
             $envName = Split-Path $env -Leaf
             $isActive = if ($env:CONDA_DEFAULT_ENV -and $env:CONDA_DEFAULT_ENV -eq $envName) {"Yes"} else {"No"}
             $result += [PSCustomObject]@{
@@ -39,6 +45,7 @@ function Get-CondaDependencies {
         [string]$envName
     )
     $currentEnv = $env:CONDA_DEFAULT_ENV
+    Write-Host "Getting Conda Dependencies: $currentEnv"
     conda activate $envName
     $dependencies = conda list --export
     if ($currentEnv) {
@@ -56,6 +63,7 @@ function Get-VenvDependencies {
         [string]$envPath
     )
     $currentVenv = $env:VIRTUAL_ENV
+    Write-Host "Getting Venv Dependencies: $currentVenv"
     & $envPath\Scripts\Activate
     $dependencies = pip list --format=freeze
     if ($currentVenv) {
@@ -74,18 +82,25 @@ function Write-DependenciesToFile {
         [string]$manager,
         [string]$dependencies
     )
-    $fileName = "requirements_${manager}_${envName}.txt"
-    $dependencies | Out-File -FilePath $fileName
+    if ($Global:FreezeDependencies) {
+        Write-Host "Writing to file Dependencies for: manager- $manager, env- $envName"
+        $fileName = "requirements_${manager}_${envName}.txt"
+        $dependencies | Out-File -FilePath $fileName
+    }
 }
 
 # Функция для проверки окружений virtualenv
 function Check-VirtualenvEnvs {
+    param (
+        [string]$Path
+    )
     # 
     $virtualenvsPath = "C:\Users\user\.virtualenvs"
     $dirs = Get-ChildItem -Path $virtualenvsPath -Directory
 
     $envs = @()
     foreach ($dir in $dirs) {
+        # Write-Host "Scanning virtualenvs: $dir"
         $envPath = Join-Path $virtualenvsPath $dir.Name
         # Проверка наличия папки Scripts, что является признаком virtualenv
         if (Test-Path "$envPath\Scripts") {
@@ -101,14 +116,18 @@ function Check-VirtualenvEnvs {
 
 # Главная функция
 function Main {
-    Write-Host "INCEPTION..."
+    # Write-Host "**************INCEPTION********************"
 
     $allEnvs = @()
-    Write-Host "checking envs..."
     Write-Host "*******************************************"
+    Write-Host "*******************************************"
+    Write-Host "checking envs..."
+    Write-Host ""
+    Write-Host "*******************************************"
+    $allEnvs += Check-VirtualenvEnvs -Path $VirtualenvsDirectory
     $allEnvs += Check-CondaEnvs
     $allEnvs += Check-VenvEnv
-    $allEnvs += Check-VirtualenvEnvs
+    # $allEnvs += Check-VirtualenvEnvs
 
     # Если окружение 'base' активно, но не в списке, добавляем его
     if ($env:CONDA_DEFAULT_ENV -and $env:CONDA_DEFAULT_ENV -eq 'base') {
@@ -144,6 +163,9 @@ function Main {
     Write-Host "envs checking finished..."
     Write-Host ""
 }
+
+# Установка глобальных переменных для параметров
+$Global:FreezeDependencies = $FreezeDependencies
 
 # Выполнение главной функции
 Main
