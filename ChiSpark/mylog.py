@@ -14,28 +14,6 @@ class MyLogger(logging.Logger):
 
     def set_logging_enabled(self, enable_logging):
         self.enable_logging = enable_logging
-    
-
-
-def check_loggers():
-    """
-    ldict = logging.Logger.manager.loggerDict
-    print('log_dict:')
-    print(ldict)
-    for logger_name, logger in logging.Logger.manager.loggerDict.items():
-        print(f"Logger Name: {logger_name}, Module: {logger.name}")
-        logger.critical(f"Logger Name: {logger_name}, Module: {logger.name}")
-    """
-    pass
-    """
-    root_logger = logging.getLogger()
-    for handler in root_logger.handlers:
-        print(str(handler))
-        if isinstance(handler, logging.StreamHandler):
-            continue
-        for logger_name, logger in handler.loggerDict.items():
-            print(f"Logger Name: {logger_name}, Module: {logger.name}")
-    """
 
 def find_logging_objects():
     logging_objects = []
@@ -58,16 +36,29 @@ def find_logging_objects():
 
 
 
-def main(my_logger_name='test_name',
+def _main(standard_logger_level = 'DEBUG',
+         my_logger_name='test_name',
          my_logger_level_creating=30,
          my_logger_level_messaging=30,
          enable_logging=True, msg='empty_msg'):
-    
-    logging.basicConfig(level='DEBUG')
-
-    # Создадим стандартный логгер
+    msg_levels = """
+    logging.DEBUG соответствует числу 10.
+    logging.INFO соответствует числу 20.
+    logging.WARNING соответствует числу 30.
+    logging.ERROR соответствует числу 40.
+    logging.CRITICAL соответствует числу 50
+    """
+    print(f'|||||||||||| Установим базовый уровень логирования \
+          {standard_logger_level} ||||||||||||||||')
+    logging.basicConfig(level= standard_logger_level)
+    print(msg_levels)
+    print('|||||||||||| Создадим стандартный logger без имени |||||||||||||')
     logger = logging.getLogger()
-
+    logger.debug('logger.debug sample msg')
+    logger.info('logger.info sample msg')
+    logger.warning('logger.warning sample msg')
+    logger.error('logger.error sample msg')
+    logger.critical('logger.critical sample msg')
     logger.info('*****************************************************')
     logger.info('Создаем экземпляр MyLogger с заданным уровнем и состоянием логирования')
     logger.info(f'MyLogger object creating level: {my_logger_level_creating}')
@@ -101,9 +92,22 @@ def main(my_logger_name='test_name',
                     f'This is an {my_logger_level_messaging} level message and it will be logged.')
 
 if __name__ == '__main__':
-    name = 'test_logger'
-    my_logger_level_creating = 30
+    """
+    logging.DEBUG соответствует числу 10.
+    logging.INFO соответствует числу 20.
+    logging.WARNING соответствует числу 30.
+    logging.ERROR соответствует числу 40.
+    logging.CRITICAL соответствует числу 50
+    """    
+    standard_logger_level = 'DEBUG'
+    my_logger_name = 'test_logger'
+    my_logger_level_creating = 10
     my_logger_level_messaging = 30
     enable_logging = True
-    msg = 'TESTING MESSAGE'
-    main(name,my_logger_level_creating,my_logger_level_messaging,enable_logging,msg)
+    msg = '||||=====  TESTING MESSAGE =====||||'
+    _main(standard_logger_level,
+         my_logger_name,
+         my_logger_level_creating,
+         my_logger_level_messaging,
+         enable_logging,
+         msg)

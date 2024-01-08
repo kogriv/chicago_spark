@@ -14,6 +14,7 @@ fi
 # We mount it to docker containers
 # So they will se the content in that directory
 PATH_TO_PROJECT_DIR=/mnt/c/Users/user/Documents/Pro/chicago_spark/
+PATH_TO_BASH_START=/mnt/c/Users/user/Documents/Pro/chicago_spark/scripts/bash_start.sh
 # PATH_TO_PROJECT_DIR="C:/Users/user/Documents/Pro/chicago_spark"
 
 MEMORY_PER_WORKER='2g'
@@ -68,14 +69,33 @@ for i in {1..4}; do
     org.apache.spark.deploy.worker.Worker spark://$SPARK_MASTER_IP:7077"
 done
 
+echo "Container jupyter_lab creating/starting..."
+# local custom_bashrc=$PATH_TO_BASH_START
+# Проверяем, существует ли кастомный скрипт Bash
+mount_custom_bashrc=""
+if [ -f "$PATH_TO_BASH_START" ]; then
+  # Если файл существует, добавляем параметр монтирования к команде
+  echo "Custom .bashrc exists"
+  mount_custom_bashrc="-v $PATH_TO_BASH_START:/home/jovyan/.bashrc"
+else
+  echo "Custom .bashrc NOT exists"
+  #mount_custom_bashrc=""
+fi
+
 # Run Jupyter Lab
-run_container "jupyter_lab" \
-  "-d --name jupyter_lab -p 10000:8888 --network spark_network --user root \
-  -v $PATH_TO_PROJECT_DIR:/work:rw \
-  -e SPARK_MASTER_IP=$SPARK_MASTER_IP \
-  -e SPARK_MASTER=spark://$SPARK_MASTER_IP:7077 \
-  jupyter/pyspark-notebook start-notebook.sh \
-  --NotebookApp.token='' --NotebookApp.notebook_dir='/work'"
+run_jupyter_command="-d --name jupyter_lab -p 10000:8888 --network spark_network --user root \
+-v $PATH_TO_PROJECT_DIR:/work:rw \
+$mount_custom_bashrc \
+-e SPARK_MASTER_IP=$SPARK_MASTER_IP \
+-e SPARK_MASTER=spark://$SPARK_MASTER_IP:7077 \
+-e PYTHONPATH=/work \
+jupyter/pyspark-notebook start-notebook.sh \
+--NotebookApp.token='' --NotebookApp.notebook_dir='/work'"
+
+echo "Jupyter container run command:"
+echo "$run_jupyter_command"
+# echo "After printing Jupyter container run command:"
+run_container "jupyter_lab" "$run_jupyter_command"
 
 echo "*********************************************************"
 echo "Creating or starting SPARK cluster is finished"

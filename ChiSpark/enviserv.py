@@ -1,6 +1,14 @@
-def read_requirements(file_path):
-    with open(file_path, 'r') as file:
-        return set(line.strip() for line in file)
+import mylog
+
+class MyReq:
+    def __init__(self) -> None:
+        self.path_req_jup = '/work/requirements_jup.txt'
+        self.path_req_vsc = '/work/requirements_vscode.txt'
+        # self.requirements_jup = 
+
+    def read_requirements(self, file_path):
+        with open(file_path, 'r') as file:
+            return set(line.strip() for line in file)
 
 # Чтение списков зависимостей из файлов
 requirements_jup = read_requirements('/work/requirements_jup.txt')
