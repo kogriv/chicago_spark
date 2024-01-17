@@ -87,4 +87,4 @@ def _main(loglevel=30, base_path=None, compared_path=None):
     print(unique_compared)
 
 if __name__ == '__main__':
-    _main(10,'n','k')
+    _main(30)
