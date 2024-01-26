@@ -2,10 +2,20 @@ import os
 import subprocess
 import json
 
-def check_conda_envs(virtualenvs_directory="C:\\Users\\user\\.virtualenvs"):
+conda_virtualenvs_directory="C:\\Users\\user\\.virtualenvs"
+
+def check_conda_envs():
     try:
+        # Проверяем, установлена ли Conda
+        conda_check = subprocess.run(\
+            ["conda", "--version"], capture_output=True, text=True)
+        
+        if conda_check.returncode != 0:
+            print("Conda is not installed.")
+            return []
         # Выполняем команду "conda env list --json" и декодируем вывод
-        envs_info = subprocess.check_output(["conda", "env", "list", "--json"]).decode("utf-8")
+        envs_info = subprocess.check_output(\
+            ["conda", "env", "list", "--json"]).decode("utf-8")
         # Преобразуем JSON-данные в словарь
         envs_data = json.loads(envs_info)
         result = []
@@ -14,7 +24,8 @@ def check_conda_envs(virtualenvs_directory="C:\\Users\\user\\.virtualenvs"):
             # Извлекаем имя окружения из пути
             env_name = os.path.basename(env)
             # Проверяем, активно ли текущее окружение
-            is_active = "Yes" if os.environ.get("CONDA_DEFAULT_ENV") == env_name else "No"
+            is_active = "Yes" if os.environ.get(\
+                "CONDA_DEFAULT_ENV") == env_name else "No"
             # Добавляем информацию об окружении в результат
             result.append({
                 "Environment": env_name,
@@ -47,21 +58,15 @@ def get_conda_dependencies(env_name):
         current_env = os.environ.get("CONDA_DEFAULT_ENV")
         print(f"Getting Conda Dependencies: {current_env}")
         
-        # Активируем требуемое окружение
-        subprocess.run(["conda", "activate", env_name], check=True)
-        # Получаем информацию о зависимостях
-        dependencies_info = subprocess.check_output(["conda", "list", "--export"]).decode("utf-8")
-        
-        # Восстанавливаем предыдущее активное окружение
-        if current_env:
-            subprocess.run(["conda", "activate", current_env], check=True)
-        else:
-            subprocess.run(["conda", "deactivate"], check=True)
+        # Получаем информацию о зависимостях указанного окружения
+        result = subprocess.run(["conda", "list", "--name", env_name], check=True, stdout=subprocess.PIPE, text=True)
+        dependencies_info = result.stdout
         
         # Разделяем зависимости и объединяем их в одну строку с разделителем
         dependencies = dependencies_info.split("\n")
         return "\r\n".join(dependencies)
-    except Exception as e:
+    except subprocess.CalledProcessError as e:
+        print(f"Error: {e}")
         return ""
 
 def get_venv_dependencies(env_path):
@@ -170,7 +175,8 @@ def main():
             
             # Записываем зависимости в файл
             if dependencies:
-                write_dependencies_to_file(env["Environment"], env["Manager"], dependencies)
+                write_dependencies_to_file(\
+                    env["Environment"], env["Manager"], dependencies)
     
     print("envs checking finished...")
     print("")
