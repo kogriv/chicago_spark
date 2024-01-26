@@ -113,22 +113,7 @@ def compare_scopes(global_scope, local_scope):
 compare_scopes(1, 1)
 
 
-global_scope_defined = \
-{'__name__': '__main__',
- '__doc__': None,
- '__package__': None,
- '__loader__': <_frozen_importlib_external.SourceFileLoader object at 0x00000243178E89A0>,
- '__spec__': None, '__annotations__': {},
- '__builtins__': <module 'builtins' (built-in)>,
- '__file__': 'C:\\Users\\user\\documents\\pro\\chicago_spark\\ChiSpark\\envi_subprocess.py',
- '__cached__': None,
- 'counter': <function counter at 0x0000024317D4D1B0>,
- 'c1': <function counter.<locals>.step at 0x0000024317D4D240>,
- 'c2': <function counter.<locals>.step at 0x0000024317D4D2D0>,
- 'say_name': <function say_name at 0x0000024317D4D360>,
- 'root_global_scope': {...},
- 'root_local_scope': {...},
- 'compare_scopes': <function compare_scopes at 0x0000024317D4D3F0>}
+
 
 
 """
