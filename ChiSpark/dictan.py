@@ -57,7 +57,6 @@ class DictAnalyzer:
             dict2 (dict): The second dictionary for comparison.
             compare_type (str, optional): The method of comparison. Can be 'direct', 'by_name', or 'by_hash'.
                 Defaults to 'direct'.
-
             structure for dicts defined in dict_info() function:
                 info_dict[key] = key_info
                 key_info = {
@@ -157,8 +156,7 @@ class DictAnalyzer:
 
         return kv, k, d1, d2
 
-
-if __name__ == '__main__':
+def _main():
     from mylog import MyLogger
 
     envilog = MyLogger('envilog', 30)
@@ -268,3 +266,6 @@ if __name__ == '__main__':
     envilog.mylev(30,"----------------------------------------")
     envilog.mylev(30,"d2:")
     envilog.mylev(30,d2)
+
+if __name__ == '__main__':
+    _main()
