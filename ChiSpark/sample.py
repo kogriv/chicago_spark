@@ -1,81 +1,43 @@
-import json
-import dictan
-from mylog import MyLogger
+def assign_variable_names(func):
+    variable_names = get_variable_names(func)
+    closure_variables = func.__closure__ if func.__closure__ else []
+    
+    variable_assignments = []
+    
+    for i, name in enumerate(variable_names):
+        is_closure = name in [cell.cell_contents for cell in closure_variables]
+        assignment = f"var_func_{func.__name__}_{i} = '{name}'"
+        if is_closure:
+            assignment += "  # Closed variable"
+        variable_assignments.append(assignment)
 
-#def print_readable_dict(input_dict):
-#    print(json.dumps(input_dict, indent=4))
+    return variable_assignments
 
+def get_variable_names(func):
+    # print(dir(func.__code__))#.co_names)
+    for i in dir(func.__code__):
+        print(i,':',eval("func.__code__."+i))
+    return func.__code__.co_names
 
+def say_name_age(name, age):
+    def say_info():
+        nested_var = 'some_value_for_nested_var'
+        print("nested_var:",nested_var)
+        print("Name:", name)
+        print("Age:", age)
 
-my_dict = {'__name__': '__main__',
-           '__doc__': None,
-           '__package__': None,
-           '__loader__': '<_frozen_importlib_external.SourceFileLoader object at 0x00000219B04689A0>',
-            '__spec__': None,
-            '__annotations__': {},
-            '__builtins__': "<module 'builtins' (built-in)>",
-            '__file__': 'C:\\Users\\user\\documents\\pro\\chicago_spark\\ChiSpark\\dicsco.py',
-            '__cached__': None,
-            'dictan': '<dictan.DictAnalyzer object at 0x00000219B0537730>',
-            'MyLogger': "<class 'mylog.MyLogger'>",
-            'dicscolog': "<MyLogger dicscolog (INFO)>",
-            'dlev': 30,
-            'locals_dict_1':
-                {'__name__': '__main__',
-                 '__doc__': None,
-                 '__package__': None,
-                 '__loader__': "<_frozen_importlib_external.SourceFileLoader object at 0x00000219B04689A0>",
-                 '__spec__': None,
-                 '__annotations__': {},
-                 '__builtins__': "<module 'builtins' (built-in)>",
-                 '__file__': 'C:\\Users\\user\\documents\\pro\\chicago_spark\\ChiSpark\\dicsco.py',
-                 '__cached__': None,
-                 'MyLogger': "<class 'mylog.MyLogger'>",
-                 'dicscolog': "<MyLogger dicscolog (INFO)>",
-                 'dlev': 30
-                },
-            'globals_dict_1':
-                    {'__name__': '__main__',
-                     '__doc__': None,
-                     '__package__': None,
-                     '__loader__': "<_frozen_importlib_external.SourceFileLoader object at 0x00000219B04689A0>",
-                     '__spec__': None,
-                     '__annotations__': {},
-                     '__builtins__': "<module 'builtins' (built-in)>",
-                     '__file__': 'C:\\Users\\user\\documents\\pro\\chicago_spark\\ChiSpark\\dicsco.py',
-                     '__cached__': None,
-                     'dictan': "<dictan.DictAnalyzer object at 0x00000219B0537730>",
-                     'MyLogger': "<class 'mylog.MyLogger'>",
-                     'dicscolog': "<MyLogger dicscolog (INFO)>",
-                     'dlev': 30,
-                     'locals_dict_1':
-                        {'__name__': '__main__',
-                         '__doc__': None,
-                         '__package__': None,
-                         '__loader__': "<_frozen_importlib_external.SourceFileLoader object at 0x00000219B04689A0>",
-                         '__spec__': None,
-                         '__annotations__': {},
-                         '__builtins__': "<module 'builtins' (built-in)>",
-                         '__file__': 'C:\\Users\\user\\documents\\pro\\chicago_spark\\ChiSpark\\dicsco.py',
-                         '__cached__': None,
-                         'dictan': "<dictan.DictAnalyzer object at 0x00000219B0537730>",
-                         'MyLogger': "<class 'mylog.MyLogger'>",
-                         'dicscolog': "<MyLogger dicscolog (INFO)>",
-                         'dlev': 30
-                        }
-                    }
-            }
+    return say_info
 
-        
-#my_dict = {'a':1,'b':{'c':3,'d':{'e':5,'f':6}}}
+f = say_name_age("Alice", 30)
+variable_names = get_variable_names(f)
 
-dicscolog = MyLogger('dicscolog')
-dlev = 30 # level for msg
+"""
+# Получаем имена переменных и создаем соответствующие переменные
+variable_assignments = assign_variable_names(f)
+for assignment in variable_assignments:
+    exec(assignment)
 
-da = dictan.DictAnalyzer(dicscolog)
-
-#da.dict_info(my_dict,True)
-
-da.print_dict(my_dict)
-
-da.print_dict(dict(globals()))
+# Печатаем созданные переменные
+for i, assignment in enumerate(variable_assignments):
+    print(f"Variable {i}: {eval(f'var_func_say_info_{i}')}")
+"""
