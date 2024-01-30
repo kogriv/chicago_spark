@@ -1,3 +1,5 @@
+import json
+
 class DictAnalyzer:
     """
     A class for analyzing and comparing dictionaries.
@@ -47,7 +49,10 @@ class DictAnalyzer:
             self.logger.mylev(self.llev, "----------------------------")
         return info_dict
 
-    def compare_dicts_info(self, dict1, dict2, compare_type='direct'):
+    def compare_dicts_info(self, dict1, dict2,
+                           complex_output = False,
+                           compare_type='direct',
+                           verbose = False):
         """
         Compare two dictionaries and identify matching,
         similar, and unique elements.
@@ -55,6 +60,7 @@ class DictAnalyzer:
         Args:
             dict1 (dict): The first dictionary for comparison.
             dict2 (dict): The second dictionary for comparison.
+            complex_output: bool. Return complex structure of dicts
             compare_type (str, optional): The method of comparison. Can be 'direct', 'by_name', or 'by_hash'.
                 Defaults to 'direct'.
             structure for dicts defined in dict_info() function:
@@ -91,15 +97,45 @@ class DictAnalyzer:
                 if key1 in dict2:
                     info2 = dict2[key1]
                     if info1['value'] == info2['value']:
-                        kv[key1] = {'info1': info1, 'info2': info2}
+                        if complex_output:
+                            kv[key1] = {'info1': info1, 'info2': info2}
+                        else:
+                            if self.scope_name(info1):
+                                kv[key1] = 'scope_dict'
+                            else:
+                                kv[key1] = info1['value']
                     else:
-                        k[key1] = {'info1': info1, 'info2': info2}
+                        if complex_output:
+                            k[key1] = {'info1': info1, 'info2': info2}
+                        else:
+                            if self.scope_name(info1):
+                                kv[key1] = 'scope_dict'
+                            else:
+                                kv[key1] = {
+                                    'val1':info1['value'],
+                                    'val':info2['value']
+                                    }
                 else:
-                    d1[key1] = info1
+                    if complex_output:
+                        d1[key1] = info1
+                    else:
+                        if self.scope_name(info1):
+                            kv[key1] = 'scope_dict'
+                        else:
+                            kv[key1] = info1['value']
 
             for key2, info2 in dict2.items():
-                if key2 not in kv and key2 not in k:
-                    d2[key2] = info2
+                if key2 in kv or key2 in k:
+                    ...
+                else:
+                    if complex_output:
+                        d2[key2] = info2
+                    else:
+                        if self.scope_name(info2):
+                            d2[key2] = 'scope_dict'
+                        else:
+                            kv[key2] = info2['value']
+
 
         if compare_type == 'by_name':
             """
@@ -154,7 +190,90 @@ class DictAnalyzer:
                 if not key1_matched:
                     d2[key2] = info2
 
+        if verbose:
+            self.logger.mylev(self.llev,"---kv-----------------------------------------")
+            #self.logger.mylev(self.llev,kv)
+            self.print_dict(kv)
+            self.logger.mylev(self.llev,"---k------------------------------------------")
+            # self.logger.mylev(self.llev,k)
+            self.print_dict(k)
+            self.logger.mylev(self.llev,"---d1-----------------------------------------")
+            #self.logger.mylev(self.llev,d1)
+            self.print_dict(d1)
+            self.logger.mylev(self.llev,"---d2-----------------------------------------")
+            #self.logger.mylev(self.llev,d2)
+            self.print_dict(d2)
+
         return kv, k, d1, d2
+    
+    def scope_name(self,info):
+        if 'key_repr' in info \
+        and ('locals_dict' in info['key_repr'] \
+        or 'globals_dict' in info['key_repr']):
+            return True
+        return False
+
+    def print_dict_json(self, input_dict, indent=4):
+        """
+        Print a dictionary in JSON format.
+
+        Args:
+            input_dict (dict): The dictionary to be printed.
+            indent (int, optional): The number of spaces to indent each level of the JSON output. Defaults to 4.
+        """
+        serializable_dict = {}
+        for key, value in input_dict.items():
+            try:
+                json.dumps({key: value})  # Пытаемся сериализовать ключ и значение
+                serializable_dict[key] = value
+            except TypeError:
+                if ('locals_dict' in key or 'globals_dict' in key):
+                    serializable_dict[key] = 'scope_dict'
+                else:
+                    serializable_dict[key] = repr(value)
+                # pass  # Пропускаем объекты, которые нельзя сериализовать
+        print(json.dumps(serializable_dict, indent=indent))
+
+    def print_dict(self, input_dict, indent=0, print_nested_scope=False, skip_dunder_attr=True):
+        """
+        Print a dictionary with options to control output.
+
+        Args:
+            input_dict (dict): The dictionary to be printed.
+            indent (int, optional): The number of spaces to indent each level of the output. Defaults to 0.
+            print_nested_scope (bool, optional): Whether to print nested scope dictionaries. Defaults to False.
+            skip_dunder_attr (bool, optional): Whether to skip dunder attributes and methods. Defaults to True.
+        """
+        opening_brace_printed = False  # флаг, чтобы отслеживать, была ли уже напечатана открывающая скобка
+
+        if not input_dict:  # Если словарь пустой
+            print(" " * indent + "{ }")
+            return
+
+        for key, value in input_dict.items():
+            if not opening_brace_printed:  # если открывающая скобка еще не напечатана
+                print(" " * indent + "{")  # печатаем ее с тем же уровнем отступа, что и ключ
+                opening_brace_printed = True
+
+            if skip_dunder_attr and key.startswith("__") and key.endswith("__"):
+                continue  # Пропускаем дандер-атрибуты и дандер-методы
+
+            if isinstance(value, dict):
+                print(" " * (indent + 4) + str(key) + ": ", end="")
+                if not print_nested_scope and ('locals_dict' in key or 'globals_dict' in key):
+                    value = 'scope_dict'
+                    print(str(value))
+                else:
+                    if not value:  # Если словарь пустой
+                        print("{ }")
+                    else:
+                        print()
+                        self.print_dict(value, indent + 4, print_nested_scope, skip_dunder_attr)
+            else:
+                print(" " * (indent + 4) + str(key) + ": " + str(value))
+
+        print(" " * indent + "}")
+
 
 def _main():
     from mylog import MyLogger

@@ -6,18 +6,24 @@ dlev = 30 # level for msg
 
 dictan = dictan.DictAnalyzer(dicscolog)
 
-glo = dict(globals())
-gloinfo = dictan.dict_info(glo,True)
+#dicscolog.mylev(dlev,'---dict(globals())-origin---------------------')
+#dicscolog.mylev(dlev,dict(globals()))
+dicscolog.mylev(dlev,'---dict(globals())-serial---------------------')
+dictan.print_dict(dict(globals()))
+dicscolog.mylev(dlev,'---dict(locals())--serial---------------------')
+#dicscolog.mylev(dlev,dict(locals()))
+dictan.print_dict(dict(locals()))
 
-dicscolog.mylev(dlev,"----------------------------------------------")
-dicscolog.mylev(dlev,"------- ---- ------- ----------- -------------")
-dicscolog.mylev(dlev,"------- ---- ------- ----------- -------------")
-dicscolog.mylev(dlev,"----------------------------------------------")
+
+locals_dict_1 = dict(locals())
+globals_dict_1 = dict(globals())
+#locinfo = dictan.dict_info(dict(locals()),True)
+#glo = dict(globals())
+# gloinfo, locinfo = 
+#dictan.dict_info(dict(globals()),True),\
+# dictan.dict_info(dict(locals()),True)
 
 
-
-loc = dict(locals())
-locinfo = dictan.dict_info(loc,True)
 # Для глобальных переменных
 # print("local_scope_defined = \\")
 dicscolog.mylev(dlev,"----------------------------------------------")
@@ -25,8 +31,24 @@ dicscolog.mylev(dlev,"------- ---- ------- ----------- -------------")
 dicscolog.mylev(dlev,"------- ---- ------- ----------- -------------")
 dicscolog.mylev(dlev,"----------------------------------------------")
 
-kv, k, d1, d2 = dictan.compare_dicts_info(gloinfo,locinfo)
+#kv, k, d1, d2 = 
+dictan.compare_dicts_info(dictan.dict_info(dict(globals()),False),
+                          dictan.dict_info(dict(locals()),False),
+                          False,
+                          'direct',
+                          True)
 
+
+dicscolog.mylev(dlev,'---dict(globals())-----------------------------')
+#dicscolog.mylev(dlev,dict(globals()))
+dictan.print_dict(dict(globals()))
+dicscolog.mylev(dlev,'---dict(locals())-----------------------------')
+#dicscolog.mylev(dlev,dict(locals()))
+dictan.print_dict(dict(locals()))
+# gloinfo, locinfo = 
+#dictan.dict_info(dict(globals()),True),\
+#dictan.dict_info(dict(locals()),True)
+"""
 dicscolog.mylev(dlev,"---kv-----------------------------------------")
 dicscolog.mylev(dlev,kv)
 dicscolog.mylev(dlev,"---k------------------------------------------")
@@ -40,7 +62,7 @@ dicscolog.mylev(dlev,d2)
 
 # Сравниваем результаты функции dict_info для двух словарей
 
-"""
+
 for t in ['direct',
           #'by_name',
           #'by_hash'
