@@ -260,12 +260,15 @@ class DictAnalyzer:
                 print(" " * indent + "{")  # печатаем ее с тем же уровнем отступа, что и ключ
                 opening_brace_printed = True
 
-            if skip_dunder_attr and key.startswith("__") and key.endswith("__"):
-                continue  # Пропускаем дандер-атрибуты и дандер-методы
+            if skip_dunder_attr and hasattr(key, 'startswith') and hasattr(key, 'endswith') \
+                and key.startswith("__") and key.endswith("__"):
+                    continue  # Пропускаем дандер-атрибуты и дандер-методы
 
             if isinstance(value, dict):
                 print(" " * (indent + 4) + str(key) + ": ", end="")
-                if not print_nested_scope and ('locals_dict' in key or 'globals_dict' in key):
+                if not print_nested_scope \
+                    and isinstance(key, str) \
+                    and ('locals_dict' in key or 'globals_dict' in key):
                     value = 'scope_dict'
                     print(str(value))
                 else:
