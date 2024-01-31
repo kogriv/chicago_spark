@@ -93,6 +93,7 @@ class DictAnalyzer:
             comparing keys directly from dictionaries,
             comparing values for 'value' elements
             """
+
             for key1, info1 in dict1.items():
                 if key1 in dict2:
                     info2 = dict2[key1]
@@ -103,6 +104,8 @@ class DictAnalyzer:
                             if self.scope_name(info1):
                                 kv[key1] = 'scope_dict'
                             else:
+                                #print(kv)
+                                #print(key1,":",info1['value'])
                                 kv[key1] = info1['value']
                     else:
                         if complex_output:
@@ -115,14 +118,14 @@ class DictAnalyzer:
                                     'val1':info1['value'],
                                     'val':info2['value']
                                     }
-                else:
+                else: # key1 not in dict2
                     if complex_output:
                         d1[key1] = info1
                     else:
                         if self.scope_name(info1):
-                            kv[key1] = 'scope_dict'
+                            d1[key1] = 'scope_dict'
                         else:
-                            kv[key1] = info1['value']
+                            d1[key1] = info1['value']
 
             for key2, info2 in dict2.items():
                 if key2 in kv or key2 in k:
@@ -134,7 +137,7 @@ class DictAnalyzer:
                         if self.scope_name(info2):
                             d2[key2] = 'scope_dict'
                         else:
-                            kv[key2] = info2['value']
+                            d2[key2] = info2['value']
 
 
         if compare_type == 'by_name':
@@ -234,7 +237,9 @@ class DictAnalyzer:
                 # pass  # Пропускаем объекты, которые нельзя сериализовать
         print(json.dumps(serializable_dict, indent=indent))
 
-    def print_dict(self, input_dict, indent=0, print_nested_scope=False, skip_dunder_attr=True):
+    def print_dict(self, input_dict, indent=0,
+                   print_nested_scope=False,
+                   skip_dunder_attr=True):
         """
         Print a dictionary with options to control output.
 

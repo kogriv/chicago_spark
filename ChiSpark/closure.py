@@ -1,26 +1,99 @@
-def say_name(name):
-    def say_goodbye():
-        nested_var = 'some_value_for_nested_var'
-        print("Don't say me goodbye, " + name + "!")
+import dictan
+from mylog import MyLogger
 
-    return say_goodbye
+lg = MyLogger('scopylogger','INFO')
+ll = 30
 
-f = say_name("Ivan")
+da = dictan.DictAnalyzer(lg,ll)
 
-def get_variable_names(func):
-    return func.__code__.co_varnames
-
-def assign_variable_names(func):
-    variable_names = get_variable_names(func)
-    # print("Variable names for function",repr(func),': ',variable_names)
-    variable_assignments = [f"var_func_{func.__name__}_{i} = '{name}'" for i, name in enumerate(variable_names)]
-    return variable_assignments
-
-print("Global scope dict:", globals())
+globals_dict_core, \
+locals_dict_core = dict(globals()), dict(locals())
+print("Global scope dict globals():")
+da.print_dict(globals_dict_core,0,False,False)
 print('------------------------------------------')
-print("Local scope dict:", locals())
+print("Local scope dict locals():")
+da.print_dict(locals_dict_core,0,False,False)
 print('------------------------------------------')
-print("Local scope list:", dir())
+#print("Local scope list dir():", dir())
+#print('------------------------------------------')
+
+def outer_func(name,old,weight):
+    nested_var_in_outer_func = 'nested_var_in_OUTER_func_value'
+    lg.mylev(ll,"outer_func for: " + str(name) + ", " +\
+             str(old) + ", weight: "+ str(weight))
+    lg.mylev(ll,"------------------------------------------")
+    globals_dict_before_closure, \
+    locals_dict_before_closure = dict(globals()), dict(locals())
+    lg.mylev(ll,"-----comparing-globals-core-vs-globals-in-outer-func---------")
+    da.compare_dicts_info(
+                        da.dict_info(globals_dict_core),
+                        da.dict_info(globals_dict_before_closure),
+                        False,'direct',True
+                        )
+
+    lg.mylev(ll,"------locals-core-----------------------------")
+    da.print_dict(locals_dict_core)
+    lg.mylev(ll,"------locals-in-outer-before-closure--------------")
+    da.print_dict(locals_dict_before_closure)
+    lg.mylev(ll,"-----comparing-locals-core-vs-locals-in-outer-func---------")
+    da.compare_dicts_info(
+                        da.dict_info(locals_dict_core),
+                        da.dict_info(locals_dict_before_closure),
+                        False,'direct',True
+                        )
+
+
+    def nested_func():
+        nested_var_in_nested_func = 'nested_var_in_NESTED_func_value'
+        lg.mylev(ll,"Name, " + name + ", old: " + old)
+        nested_var_in_outer_func_modified_in_nested = \
+            nested_var_in_outer_func + "_modified"
+        
+        globals_dict_in_closure, \
+        locals_dict_in_closure = dict(globals()), dict(locals())
+
+        lg.mylev(ll,"-----comparing-globals-in-outer-vs-globals-in-nested-func---------")
+        da.compare_dicts_info(da.dict_info(globals_dict_before_closure),
+                              da.dict_info(globals_dict_in_closure),
+                              False,'direct',True)
+        
+        lg.mylev(ll,"-----comparing-locals-outer-vs-locals-in-nested-func---------")
+        da.compare_dicts_info(da.dict_info(locals_dict_before_closure),
+                              da.dict_info(locals_dict_in_closure),
+                              False,'direct',True)
+
+
+    return nested_func
+
+
+lg.mylev(30,'------------------------------------------')
+lg.mylev(30,'----f = outer_func("Ivan","30",80)--------')
+f = outer_func("Ivan","30",80)
+
+lg.mylev(30,'------------------------------------------')
+lg.mylev(30,'----f()-----------------------------------')
+f()
+
+def check_closured(func):
+    if '__closure__' in dir(func):
+        return True
+    return False
+
+def get_func_code_dict(func):
+    code_dict = {}
+    if '__code__' in dir(func):
+        for i in dir(func.__code__):
+            code_dict[i] = eval("func.__code__."+i)
+            print(i,':',eval("func.__code__."+i))
+    else: code_dict['empty_code_for'] = func
+    return code_dict
+
+"""
+print("Global scope dict globals():", globals())
+print('------------------------------------------')
+print("Local scope dict locals():", locals())
+print('------------------------------------------')
+print("Local scope list dir():", dir())
 print('------------------------------------------')
 print("Scope list of variable 'f':", dir(f))
 print('------------------------------------------')
@@ -32,27 +105,4 @@ print('------------------------------------------')
 print("Globals f.__globals__:", f.__globals__)
 print('------------------------------------------')
 
-# Извлекаем значение переменной name из замыкания
-closure_value = f.__closure__[0].cell_contents
-print("Value of closed variable 'name':", closure_value)
-print('------------------------------------------')
-
-print("Variable assignments for nested [f=say_name(..)]:")
-# Получаем имена переменных и создаем соответствующие переменные
-variable_assignments = assign_variable_names(f)
-for assignment in variable_assignments:
-    exec(assignment)
-# Печатаем созданные переменные
-for i in range(len(variable_assignments)):
-    print(f"Variable {i}: {eval(f'var_func_say_goodbye_{i}')}")
-print('------------------------------------------')
-
-print("Variable assignments for outer [say_name]:")
-# Получаем имена переменных и создаем соответствующие переменные
-variable_assignments = assign_variable_names(say_name)
-for assignment in variable_assignments:
-    exec(assignment)
-# Печатаем созданные переменные
-for i in range(len(variable_assignments)):
-    print(f"Variable {i}: {eval(f'var_func_say_name_{i}')}")
-print('------------------------------------------')
+"""
