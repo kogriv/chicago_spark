@@ -1,4 +1,3 @@
-import inspect
 import dictan
 from mylog import MyLogger
 
@@ -161,23 +160,3 @@ lg.mylev(ll,"---------------------------------------------------")
 
 
 lg.mylev(ll,"---------------------------------------------------")
-#lg.mylev(ll,'----get_func_code_dict(outer_func)-----------------')
-#outer_code_dict = get_func_code_dict(f,True)
-
-"""
-print("Global scope dict globals():", globals())
-print('------------------------------------------')
-print("Local scope dict locals():", locals())
-print('------------------------------------------')
-print("Local scope list dir():", dir())
-print('------------------------------------------')
-print("Scope list of variable 'f':", dir(f))
-print('------------------------------------------')
-
-
-print("Local variables f.__code__.co_varnames:", f.__code__.co_varnames)
-print('------------------------------------------')
-print("Globals f.__globals__:", f.__globals__)
-print('------------------------------------------')
-
-"""
