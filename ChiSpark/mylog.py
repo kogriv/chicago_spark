@@ -60,6 +60,8 @@ def _main(standard_logger_level = 'DEBUG',
     logger.error('logger.error sample msg')
     logger.critical('logger.critical sample msg')
     logger.info('*****************************************************')
+    logger.info('*****************************************************')
+    logger.info('*****************************************************')
     logger.info('Создаем экземпляр MyLogger с заданным уровнем и состоянием логирования')
     logger.info(f'MyLogger object creating level: {my_logger_level_creating}')
     logger.info(f'MyLogger object messaging level: {my_logger_level_messaging}')
