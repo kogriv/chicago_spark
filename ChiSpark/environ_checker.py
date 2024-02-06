@@ -18,11 +18,19 @@ class EnvironCheck:
         - envilog (MyLogger): Logger instance.
         - verbose (bool): Verbosity flag.
         """
+        if verbose:
+            envilog.mylev(llev,
+                "---------------------------------------------------")
+            envilog.mylev(llev,
+                "Attempt to initialise EnvironCheck's instance")
+
         self.llev = llev
         if envilog is None:
             envilog = MyLogger('envilog', self.llev)
         self.envilog = envilog
         if verbose:
+            envilog.mylev(llev,
+                "---------------------------------------------------")
             envilog.mylev(llev,
                 "Attempt to execute check_in_container()...")
         self.container_id = self.check_in_container()
@@ -222,6 +230,16 @@ class EnvironCheck:
                 f"Environment variables saved to file:")
             self.envilog.mylev(self.llev,save_path)
 
+
+def load_env(file_path=".env"):
+    try:
+        with open(file_path, "r") as file:
+            for line in file:
+                if line.strip() and not line.startswith("#"):
+                    key, value = map(str.strip, line.split("=", 1))
+                    os.environ[key] = value
+    except FileNotFoundError:
+        print(f"File {file_path} not found. No environment variables loaded.")
 
 if __name__ == '__main__':
     envilog = MyLogger('environcker','INFO')
