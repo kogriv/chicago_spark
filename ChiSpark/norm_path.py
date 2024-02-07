@@ -1,58 +1,49 @@
-import os
 import subprocess
+import os
 
-def normalize_path(path):
-    windows_path = False
-    linux_path = False
-
-    # Шаг 1: Определение формата пути
-    if "\\" in path:
-        windows_path = True
-    elif "/" in path:
-        linux_path = True
-
-    # Шаг 2: Обработка виндовых путей
-    if windows_path:
-        # Попытка получить правильный путь средствами Windows
+def universalize_path(input_path):
+    # Проверяем формат пути
+    if '\\' in input_path:
+        # Путь является путем Windows
+        # Переходим в папку и получаем правильный путь с помощью команды cd
         try:
-            windows_normalized_path = os.path.abspath(path)
-        except:
-            windows_normalized_path = None
+            subprocess.run(f'cd "{input_path}"',
+                           shell=True, check=True,
+                           stdout=subprocess.PIPE,
+                           stderr=subprocess.PIPE)
+            corrected_path = subprocess.run('cd',
+                                            shell=True,
+                                            check=True,
+                                            stdout=subprocess.PIPE,
+                                            stderr=subprocess.PIPE).\
+                                                stdout.decode().strip()
+        except subprocess.CalledProcessError:
+            return False, False  # Возвращаем False, если путь недействителен
 
-        # Если не удалось получить правильный путь, используем запасной метод
-        if windows_normalized_path is None:
-            # TODO: Добавить обработку для случая, когда путь нельзя нормализовать средствами Windows
-            pass
+        # Формируем путь для bash
+        bash_path = corrected_path.replace('\\', '/').replace(':', '', 1)
+        if bash_path.startswith('/'):
+            bash_path = bash_path[1:]
         
-        # print(windows_normalized_path)
-        # Преобразование в путь для Bash
-        bash_path = windows_normalized_path.replace("\\", "/")
-        bash_path = windows_normalized_path.replace(":", "/")
-        #bash_path = bash_path[2:] if bash_path[1] == ":" else bash_path
+        return corrected_path, bash_path
 
-        return windows_normalized_path, bash_path
+    elif '/' in input_path:
+        # Путь является путем Linux
+        # Формируем путь для Windows
+        win_path = input_path.replace('/', '\\')
+        if win_path.startswith('\\'):
+            win_path = win_path[1:]
+        if ':' not in win_path:
+            win_path = os.getcwd()[:2] + '\\' + win_path  # Добавляем диск по умолчанию, если его нет
 
-    # Шаг 3: Обработка путей в стиле Linux
-    elif linux_path:
-        # Преобразование в путь для Windows
-        windows_path = subprocess.check_output(['wsl', 'wslpath', '-w', path]).decode().strip()
+        return win_path, input_path
 
-        # Преобразование в путь для Bash
-        bash_path = path
+    else:
+        # Невозможно определить формат пути
+        return False, False
 
-        return windows_path, bash_path
-
-    return None, None  # В случае неверного формата пути возвращаем None
-
-# Пример использования
+# Пример использования:
 input_path = "C:\\Users\\user\\documents\\pro"
-print("input path:",input_path)
-windows_path, bash_path = normalize_path(input_path)
+windows_path, bash_path = universalize_path(input_path)
 print("Windows path:", windows_path)
 print("Bash path:", bash_path)
-
-input_path = "/home/user/documents/pro"
-print("input path:",input_path)
-linux_path, windows_path = normalize_path(input_path)
-print("Linux path:", linux_path)
-print("Windows path:", windows_path)
