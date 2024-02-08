@@ -31,10 +31,33 @@ def get_actual_folder_name(path):
         # Возвращение фактического имени папки
         return find_data.cFileName
 
+def get_actual_path(folder_path):
+    # Удаление слэша в конце пути, если есть
+    if folder_path.endswith('\\'):
+        folder_path = folder_path[:-1]
+
+    print("folder_path:",folder_path)
+    # Разбиваем путь на компоненты
+    path_components = folder_path.split('\\')
+    actual_path = ''
+    for component in path_components:
+        print("component:",component)
+        if component:
+            # Если компонент содержит только одну букву и двоеточие,
+            # добавляем его к актуальному пути без вызова get_actual_folder_name
+            if len(component) == 2 and component[1] == ':':
+                actual_path += component
+            else:
+                actual_path = '\\'.join([actual_path, get_actual_folder_name(actual_path + '\\' + component)])
+                if actual_path is None:
+                    return None
+        print(actual_path)
+    return actual_path
+
 # Пример использования функции
-folder_path = "C:\\Users\\user\\documents\\pro\\"
-actual_folder_name = get_actual_folder_name(folder_path)
-if actual_folder_name:
-    print(f"Фактическое имя папки: {actual_folder_name}")
+folder_path = "C:\\Users\\user\\documents\\pro\\rta\\"
+folder_path_actual = get_actual_path(folder_path)
+if folder_path_actual:
+    print(f"Фактический путь: {folder_path_actual}")
 else:
-    print("Не удалось получить фактическое имя папки.")
+    print("Не удалось получить фактический путь.")
