@@ -6,21 +6,6 @@ import ctypes
 from ctypes import wintypes
 
 
-# Определение структуры WIN32_FIND_DATA
-class WIN32_FIND_DATA(ctypes.Structure):
-    _fields_ = [
-        ("dwFileAttributes", wintypes.DWORD),
-        ("ftCreationTime", wintypes.FILETIME),
-        ("ftLastAccessTime", wintypes.FILETIME),
-        ("ftLastWriteTime", wintypes.FILETIME),
-        ("nFileSizeHigh", wintypes.DWORD),
-        ("nFileSizeLow", wintypes.DWORD),
-        ("dwReserved0", wintypes.DWORD),
-        ("dwReserved1", wintypes.DWORD),
-        ("cFileName", wintypes.WCHAR * 260),
-        ("cAlternateFileName", wintypes.WCHAR * 14)
-    ]
-
 def get_actual_folder_name(path):
     """
     Данная функция используется только на виндоус.
@@ -29,6 +14,20 @@ def get_actual_folder_name(path):
     ("cFileName", wintypes.WCHAR * 260)
     """
     if sys.platform == 'win32':
+        # Определение структуры WIN32_FIND_DATA
+        class WIN32_FIND_DATA(ctypes.Structure):
+            _fields_ = [
+                ("dwFileAttributes", wintypes.DWORD),
+                ("ftCreationTime", wintypes.FILETIME),
+                ("ftLastAccessTime", wintypes.FILETIME),
+                ("ftLastWriteTime", wintypes.FILETIME),
+                ("nFileSizeHigh", wintypes.DWORD),
+                ("nFileSizeLow", wintypes.DWORD),
+                ("dwReserved0", wintypes.DWORD),
+                ("dwReserved1", wintypes.DWORD),
+                ("cFileName", wintypes.WCHAR * 260),
+                ("cAlternateFileName", wintypes.WCHAR * 14)
+            ]
         # Инициализация структуры WIN32_FIND_DATA
         find_data = WIN32_FIND_DATA()
         # Загрузка библиотеки kernel32.dll
@@ -53,7 +52,6 @@ def get_actual_path(folder_path):
         if folder_path.endswith('\\'):
             folder_path = folder_path[:-1]
 
-        #print("folder_path:",folder_path)
         # Разбиваем путь на компоненты
         path_components = folder_path.split('\\')
         actual_path = ''
@@ -73,13 +71,25 @@ def get_actual_path(folder_path):
     else:
         return folder_path
 
-def universalize_path(input_path, standard_path=None):
-    if standard_path is None:
-        standard_path = [
+def universalize_path(input_path,
+                      standard_path_win=None,
+                      standard_path_linux=None):
+    if standard_path_win is None:
+        standard_path_win = [
             "C:\\Users\\user\\documents\\pro",
-            "C:\\Users\\user",
             "C:\\Projects"
         ]
+        if sys.platform == 'win32':
+            standard_path_win.append(os.environ['USERPROFILE'])
+
+    if standard_path_linux is None:
+        standard_path_linux = []
+        if sys.platform.startswith('linux'):
+            standard_path_linux.append(os.environ['HOME'])
+        if sys.platform == 'win32':
+            home_path = os.environ['USERPROFILE']
+            home_path = '/' + home_path.replace('\\', '/').replace(':', '', 1)
+        
 
     if '\\' in input_path:
         # Путь является путем Windows
@@ -87,7 +97,7 @@ def universalize_path(input_path, standard_path=None):
         if not os.path.exists(input_path):
             return False, False  # Возвращаем False, если путь недействителен
 
-        # Переходим в папку и получаем правильный путь
+        # Получаем правильный путь (с учетом регистров имени)
         try:
             corrected_path = get_actual_path(input_path)
         except subprocess.CalledProcessError:
@@ -101,7 +111,6 @@ def universalize_path(input_path, standard_path=None):
     else:
     #elif '/' in input_path:
         # Путь является путем Linux или это просто имя папки
-        
         # Проверяем заканчивается ли путь слэшем
         if input_path[-1] == '/':
             input_path = input_path[:-1]
@@ -131,7 +140,7 @@ def universalize_path(input_path, standard_path=None):
             print("двоеточния нет в виндоус-пути")
             # Находим путь в Windows, содержащий win_path
             path_found = False
-            for parent_path in standard_path:
+            for parent_path in standard_path_win:
                 if path_found:
                     break
                 for root, dirs, files in os.walk(parent_path):
