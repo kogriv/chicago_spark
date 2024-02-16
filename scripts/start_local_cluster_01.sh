@@ -92,6 +92,8 @@ $mount_custom_bashrc \
 jupyter/pyspark-notebook start-notebook.sh \
 --NotebookApp.token='' --NotebookApp.notebook_dir='/work'"
 
+#docker cp .condarc jupyter_lab:/opt/conda/
+
 echo "Jupyter container run command:"
 echo "$run_jupyter_command"
 # echo "After printing Jupyter container run command:"

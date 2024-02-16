@@ -42,11 +42,11 @@ def _main(standard_logger_level = 'DEBUG',
          my_logger_level_messaging=30,
          enable_logging=True, msg='empty_msg'):
     msg_levels = """
-    logging.DEBUG соответствует числу 10.
-    logging.INFO соответствует числу 20.
-    logging.WARNING соответствует числу 30.
-    logging.ERROR соответствует числу 40.
-    logging.CRITICAL соответствует числу 50
+    logging.DEBUG       соответствует числу 10.
+    logging.INFO        соответствует числу 20.
+    logging.WARNING     соответствует числу 30.
+    logging.ERROR       соответствует числу 40.
+    logging.CRITICAL    соответствует числу 50
     """
     print(f'|||||||||||| Установим базовый уровень логирования \
           {standard_logger_level} ||||||||||||||||')

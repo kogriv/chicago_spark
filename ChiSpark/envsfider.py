@@ -4,15 +4,45 @@ import sys
 import ctypes
 from ctypes import wintypes
 
+from mylog import MyLogger
 
-class PathFinder:
+class VenvsFinder:
     """
     Class to find venvs files in a given path
     using various shells or Python itself.
     """
 
-    def __init__(self):
-        pass
+    def __init__(self,
+                 llev=30,
+                 envilog=None,
+                 verbose=False):
+        """
+        Initializes an VenvsFinder instance.
+
+        Parameters:
+        - llev (int): Logging message level.
+        - envilog (MyLogger): Logger instance.
+        - verbose (bool): Verbosity flag.
+        """
+        self.verbose = verbose
+
+        if self.verbose:
+            print("---------------------------------------------------")
+            print("Attempt to initialise VenvsFinder's instance")
+        
+         #['DEBUG','INFO','WARNING','ERROR','CRITICAL']
+        if llev not in [10,20,30,40,50]:
+            llev = 30
+        self.llev = llev
+
+        if envilog is None:
+            envilog = MyLogger('envilog', 'INFO')
+        self.envilog = envilog
+        
+        if self.verbose:
+            envilog.mylev(llev,
+                "VenvsFinder's instance initialized")
+
 
     def get_actual_folder_name(self, path):
         """
@@ -236,7 +266,7 @@ class PathFinder:
 
         for shell in shells:
             if verbose:
-                print('Checking:', shell)
+                self.envilog.mylev(self.llev,f'Checking: {shell}')
             try:
                 if shell == 'powershell':
                     subprocess.check_call([
@@ -274,9 +304,10 @@ class PathFinder:
         else:
             return results
 
-    def search_files(self,
+    def search_venvs_path(self,
                      path_find=None,
-                     shell='python'):
+                     shell='python',
+                     verbose=False):
         """
         Search activation files in a given path using
         various shells or Python itself.
@@ -304,18 +335,32 @@ class PathFinder:
         if win_path and bash_path:
             if shell != 'python':
                 if self.check_shells(shell):
-                    print(f"Shell {shell} is available")
+                    if verbose:
+                        self.envilog.mylev(self.llev,
+                            f"Shell {shell} is available")
+                
                 else:
                     pyfind = True
-                    print(
-                    f"Shell {shell} is not available, "+\
-                    f"finding using Python os.walk()"
-                    )
+                    if verbose:
+                        self.envilog.mylev(self.llev,
+                        f"Shell {shell} is not available, "+\
+                        f"finding using Python os.walk()"
+                        )
+                
+                if home_directory == "/" and shell == 'bash':
+                    pyfind = True
+                    if verbose:
+                        self.envilog.mylev(self.llev,
+                            f"Shell Bash and Path to find equal to '/', "+\
+                        f"finding using Python os.walk()"
+                        )
             else:
                 pyfind = True
         
             if pyfind:
-                print("Attempting to find files using Python")
+                if verbose:
+                    self.envilog.mylev(self.llev,
+                        "Attempting to find files using Python")
                 path_to_find = win_path
                 if sys.platform.startswith('linux'):
                     path_to_find = bash_path
@@ -325,7 +370,9 @@ class PathFinder:
                             results.append(os.path.join(root, file))
             else:
                 if shell == 'bash':
-                    print("Attempting to find files using bash")
+                    if verbose:
+                        self.envilog.mylev(self.llev,
+                            "Attempting to find files using bash")
                     try:
                         find_command = f'find {bash_path} '+\
                             f'-path "/proc" -prune -o '+\
@@ -336,10 +383,13 @@ class PathFinder:
                         )
                         results.extend(output.strip().split('\n'))
                     except subprocess.CalledProcessError as e:
-                        print("Error occurred:", e)
+                        self.envilog.mylev(self.llev,
+                                    "Error occurred:", e)
                 elif shell == 'powershell':
-                    print(f"Attempting to find files "+\
-                          f"using PowerShell (Windows)")
+                    if verbose:
+                        self.envilog.mylev(self.llev,
+                            f"Attempting to find files "+\
+                            f"using PowerShell (Windows)")
                     try:
                         find_command = f'Get-ChildItem -Path '+\
                             f'"{win_path}" -Recurse -File '+\
@@ -350,28 +400,39 @@ class PathFinder:
                             '-NoProfile', '-Command', find_command],
                             text=True)
                         results.extend(output.strip().split('\n'))
-                    except subprocess.CalledProcessError:
-                        pass
+                    except subprocess.CalledProcessError as e:
+                        self.envilog.mylev(self.llev,
+                                    "Error occurred:", e)
 
         else:
-            print("Path does not exist")
+            self.envilog.mylev(self.llev,"Path does not exist")
             return []
         
         return results
 
+if __name__ == '__main__':
+    # Example usage:
+    #ptf_bash = "C:\\Users\\user\\documents"
+    ptf_bash = "/"
+    #ptf_bash = None
+    """
+    print("----------------------------------------------------")
+    print("Finding using bash /// path to find:")
+    print(ptf_bash)
+    result_list = VenvsFinder().search_venvs_path(
+        path_find=ptf_bash, shell='bash')
+    print(result_list)
 
-# Example usage:
-#ptf_bash = "C:\\Users\\user\\documents"
-#ptf_bash = "/"
-ptf_bash = None
-print("----------------------------------------------------")
-print("Finding using bash /// path to find")
-print(ptf_bash)
-result_list = PathFinder().search_files(path_find=ptf_bash, shell='bash')
-print(result_list)
-
-print("----------------------------------------------------")
-print("Finding using Python /// path to find")
-print(ptf_bash)
-result_list = PathFinder().search_files(path_find=ptf_bash)
-print(result_list)
+    print("----------------------------------------------------")
+    print("Finding using Python /// path to find:")
+    print(ptf_bash)
+    result_list = VenvsFinder().search_venvs_path(
+        path_find=ptf_bash)
+    print(result_list)
+    """
+    print("----------------------------------------------------")
+    print("Finding using Powershell /// path to find:")
+    print(ptf_bash)
+    result_list = VenvsFinder().search_venvs_path(
+        path_find=ptf_bash, shell='powershell',verbose=True)
+    print(result_list)
