@@ -19,6 +19,8 @@ def get_host_installed_python_versions():
         # Проверяем, является ли папка версией Python
         if folder.startswith('Python'):
             python_version = folder.replace('Python', '')
+            if len(python_version)>1:
+                python_version = python_version[0]+'.'+python_version[1:]
             python_version_path = os.path.join(python_installation_path, folder)
             python_executable = os.path.join(python_version_path, 'python.exe')
 

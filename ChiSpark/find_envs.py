@@ -119,7 +119,10 @@ def get_dependencies(package_manager, env_name, environments):
         dependencies = []
         for line in lines:
             if 'export' in line:
-                dependency = line.split('=')[1].strip()
+                if '=' in line:
+                    dependency = line.split('=')[1].strip()
+                else:
+                    dependency = line
                 dependencies.append(dependency)
 
         return dependencies
@@ -140,4 +143,35 @@ def get_dependencies(package_manager, env_name, environments):
     else:
         print(f"Environment '{env_name}' not found for package manager '{package_manager}'.")
         return []
-
+"""
+host_venvs = \
+{
+'virtualenvs':
+    {
+        'Archip_Logging': 'C:\\Users\\user\\.virtualenvs\\Archip_Logging\\Scripts\\activate',
+        'Archip_OOPushka': 'C:\\Users\\user\\.virtualenvs\\Archip_OOPushka\\Scripts\\activate',
+        'Buratino': 'C:\\Users\\user\\.virtualenvs\\Buratino\\Scripts\\activate',
+        'chicago_spark': 'C:\\Users\\user\\.virtualenvs\\chicago_spark\\Scripts\\activate',
+        'DemoPyCharmProductive': 'C:\\Users\\user\\.virtualenvs\\DemoPyCharmProductive\\Scripts\\activate',
+        'PapaPy': 'C:\\Users\\user\\.virtualenvs\\PapaPy\\Scripts\\activate',
+        'PyCharmLearningProject': 'C:\\Users\\user\\.virtualenvs\\PyCharmLearningProject\\Scripts\\activate',
+        'pycharm_Luchanos': 'C:\\Users\\user\\.virtualenvs\\pycharm_Luchanos\\Scripts\\activate',
+        'pyhub': 'C:\\Users\\user\\.virtualenvs\\pyhub\\Scripts\\activate'
+    },
+'conda': 
+    {
+        'fastapi': 'C:\\Users\\user\\anaconda3\\envs\\fastapi\\Lib\\venv\\scripts\\common\\activate',
+        'spark': 'C:\\Users\\user\\anaconda3\\envs\\spark\\Lib\\venv\\scripts\\common\\activate',
+        'tf': 'C:\\Users\\user\\anaconda3\\envs\\tf\\Lib\\venv\\scripts\\common\\activate',
+        'vbt': 'C:\\Users\\user\\anaconda3\\envs\\vbt\\Lib\\venv\\scripts\\common\\activate'},
+'venv': 
+    {
+        '.test_venv': 'C:\\Users\\user\\Documents\\Pro\\Archip\\arch\\.test_venv\\Scripts\\activate',
+        'myenv_prompt': 'C:\\Users\\user\\Documents\\Pro\\Archip\\arch\\myenv_prompt\\Scripts\\activate',
+        'arch': 'C:\\Users\\user\\Documents\\Pro\\Archip\\arch\\Scripts\\activate'
+    }
+}
+"""
+dependencies = \
+get_dependencies('virtualenvs','chicago_spark',grouped_paths)
+print(dependencies)

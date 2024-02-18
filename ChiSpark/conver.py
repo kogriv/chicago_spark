@@ -44,7 +44,8 @@ real_python_executables = remove_symbolic_links(python_executables)
 
 if real_python_executables:
     print("Установленные Python-интерпретаторы:")
+    print(real_python_executables)
     for version, path in real_python_executables.items():
         print(f"Версия Python {version}: {path}")
 else:
-    print("Python-интерпретаторы не найдены.") 
+    print("Python-интерпретаторы не найдены.")
