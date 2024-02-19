@@ -35,9 +35,9 @@ def get_dependencies_pip(virtualenv_path):
             packages[package_name] = package_version
     return packages
 
-def get_dependencies_conda(conda_env_path):
-    command = ['conda', 'list']
-    process = subprocess.Popen(command, cwd=conda_env_path, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+def get_dependencies_conda(conda_env_name):
+    command = ['conda', 'list -n']
+    process = subprocess.Popen(command, cwd=conda_env_name, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     output, error = process.communicate()
     dependencies = output.decode("utf-8")
     packages = {}
@@ -57,7 +57,9 @@ virtualenvs_cont = {
     }
 
 conda_envs_cont = {
-    'conda_python3.11': '/opt/conda/lib/python3.11/venv/scripts/common/activate',
+    #'base':  '/opt/conda'
+    #'conda_python3.11': '/opt/conda'
+    #'.../lib/python3.11/venv/scripts/common/activate',
     #'venv_python3.10': '/usr/lib/python3.10/venv/scripts/common/activate'
     }
 
@@ -66,7 +68,12 @@ def get_dependencies_pip_activ(venv_path):
     command = f"source {venv_path} && pip list"
     print(command)
     # Выполняем команду через bash
-    process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, executable='/bin/bash')
+    process = subprocess.Popen(command
+                    , stdout=subprocess.PIPE
+                    , stderr=subprocess.PIPE
+                    , shell=True
+                    #, executable='/bin/bash'
+                    )
     output, error = process.communicate()
     dependencies = {}
     if output:
@@ -93,7 +100,7 @@ for venv_name, venv_path in conda_envs_cont.items():
     dependencies_dict.setdefault('conda', {}).update(
         {venv_name: 
         #get_dependencies_pip(venv_path)
-        get_dependencies_pip_activ(venv_path)
+        get_dependencies_conda(venv_path)
         }
         )
 """
