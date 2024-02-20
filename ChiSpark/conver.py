@@ -11,7 +11,9 @@ def find_python_executables():
             for filename in os.listdir(path):
                 full_path = os.path.join(path, filename)
                 # Проверяем, является ли файл исполняемым и начинается ли с "python"
-                if os.path.isfile(full_path) and os.access(full_path, os.X_OK) and filename.startswith('python'):
+                if os.path.isfile(full_path) \
+                    and os.access(full_path, os.X_OK) \
+                    and filename.startswith('python'):
                     # Получаем версию Python из имени файла
                     version = filename.split('python')[-1]
                     # Убираем десятичные разделители и лишние символы
