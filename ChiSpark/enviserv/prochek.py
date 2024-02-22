@@ -55,7 +55,7 @@ def get_command_line(pid):
 
             kernel32.ReadProcessMemory(
                 h_process,
-                ctypes.c_void_p(0x7FFE0000),  # Это адрес, где находится таблица PEB
+                ctypes.c_void_p(2004397230288),  # Это адрес, где находится таблица PEB
                 ctypes.byref(lp_base_address),
                 ctypes.sizeof(lp_base_address),
                 ctypes.byref(lp_number_of_bytes_written)

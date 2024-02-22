@@ -1,6 +1,6 @@
 import subprocess
-from dictan import DictAnalyzer
-from mylog import MyLogger
+from .dictan import DictAnalyzer
+from .mylog import MyLogger
 
 dep = MyLogger('dep','INFO')
 

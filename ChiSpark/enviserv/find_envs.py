@@ -1,16 +1,19 @@
 import sys
 import os
 import subprocess
-from environcheck import EnvironCheck
-from envsfider import VenvsFinder
-from mylog import MyLogger
-from dictan import DictAnalyzer
+
+from .environcheck import EnvironCheck
+from .envsfider import VenvsFinder
+from .mylog import MyLogger
+from .dictan import DictAnalyzer
 
 envilog = MyLogger(name='ech',create_level='INFO',enable_logging=True)
 
 da = DictAnalyzer(envilog,30)
 venvsfinder = VenvsFinder(llev=30,envilog=envilog,verbose=False)
 ech = EnvironCheck(llev=30,envilog=envilog,verbose=False)
+
+
 
 envs_path_list_win = []
 envs_path_list_linux = []
@@ -75,6 +78,10 @@ def get_venvs_paths(envs_path_list_win=None,
         if envs_path_list_linux is None \
             or envs_path_list_linux==[]:
             if ech.container_id:
+                if verbose:
+                    print("Progremm runing in docker container:",
+                          ech.container_id)
+                    print("So root path '/' will be used for searching")
                 envs_path_list_linux = ["/"]
             else:
                 envs_path_list_linux = [

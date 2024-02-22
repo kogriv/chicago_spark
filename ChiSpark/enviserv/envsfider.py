@@ -4,7 +4,7 @@ import sys
 import ctypes
 from ctypes import wintypes
 
-from mylog import MyLogger
+from .mylog import MyLogger
 
 class VenvsFinder:
     """

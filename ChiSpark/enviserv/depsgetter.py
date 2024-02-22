@@ -3,10 +3,10 @@ import os
 import subprocess
 import re
 
-from environcheck import EnvironCheck
-from envsfider import VenvsFinder
-from mylog import MyLogger
-from dictan import DictAnalyzer
+from .environcheck import EnvironCheck
+from .envsfider import VenvsFinder
+from .mylog import MyLogger
+from .dictan import DictAnalyzer
 
 class DepsGetter:
     def __init__(self):

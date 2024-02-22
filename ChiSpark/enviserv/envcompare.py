@@ -1,4 +1,4 @@
-from mylog import MyLogger, find_logging_objects
+from .mylog import MyLogger, find_logging_objects
 import os
 
 envilog = MyLogger('envilog', 30)

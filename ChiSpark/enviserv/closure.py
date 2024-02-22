@@ -1,5 +1,5 @@
-import dictan
-from mylog import MyLogger
+from . import dictan
+from .mylog import MyLogger
 
 lg = MyLogger('scopylogger','INFO')
 ll = 30

@@ -1,6 +1,7 @@
 import os
 import platform
-from mylog import MyLogger
+
+from .mylog import MyLogger
 
 class EnvironCheck:
     """

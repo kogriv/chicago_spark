@@ -1,8 +1,8 @@
 import subprocess
 import re
 
-from dictan import DictAnalyzer
-from mylog import MyLogger
+from .dictan import DictAnalyzer
+from .mylog import MyLogger
 
 envilog = MyLogger('base_venvs_win','INFO')
 da = DictAnalyzer(logger=envilog,llev=30)
@@ -36,7 +36,7 @@ venvs_base = {}
 version_pattern = re.compile(r"Python(\d+)(\d+)\\python.exe")
 
 for python_path in python_paths:
-    print("Определяем версию для пути:")
+    print("Получаем зависимости для питона на пути:")
     print(python_path)
     # Извлекаем версию Python из пути
     version_match = version_pattern.search(python_path)
