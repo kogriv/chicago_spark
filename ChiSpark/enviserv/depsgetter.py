@@ -2,11 +2,16 @@ import sys
 import os
 import subprocess
 import re
+import copy
+import time
 
-from .environcheck import EnvironCheck
-from .envsfider import VenvsFinder
-from .mylog import MyLogger
-from .dictan import DictAnalyzer
+from importlib.metadata import version, PackageNotFoundError
+from importlib.metadata import distributions
+
+from .environcheck  import EnvironCheck
+from .envsfider     import VenvsFinder
+from .mylog         import MyLogger
+from .dictan        import DictAnalyzer
 
 class DepsGetter:
     def __init__(self):
@@ -18,12 +23,13 @@ class DepsGetter:
         self.envs_path_list_linux = []
         self.result_list = []
         self.grouped_paths = {
+            'conda': {},
             'venv': {},
-            'virtualenvs': {},
-            'conda': {}
+            'virtualenvs': {}
         }
         self.environments = {}
         self.errors = {}
+        self.all_deps = {}
 
     def get_venvs_paths(self, envs_path_list_win=None, envs_path_list_linux=None, verbose=False):
         """
@@ -342,7 +348,7 @@ class DepsGetter:
         else:
             return False
 
-    def get_all_dependencies(self, environments, verbose=True):
+    def get_all_dependencies(self, environments=None, verbose=True):
         """
         Retrieves dependencies for all virtual environments specified in the environments dictionary.
 
@@ -353,6 +359,18 @@ class DepsGetter:
         Returns:
         - None
         """
+        if environments is None:
+            if self.grouped_paths == {}:
+                if verbose:
+                    print("Attempting get paths dict to activation scripts")
+                self.get_venvs_paths(verbose=verbose)
+            environments = copy.deepcopy(self.grouped_paths)
+            self.all_deps = copy.deepcopy(environments)
+        if environments is None or environments == {}:
+            if verbose:
+                print("venvs paths dict is empty or None. False will be returned")
+                return False
+
         if verbose:
             print("---------------------------------------------------------")
             print("- Function get_all_dependencies() started ---------------")
@@ -372,9 +390,11 @@ class DepsGetter:
                         if dependencies:
                             if verbose:
                                 print("---- Dependencies obtained! Dictionary will be added ----")
+                            self.all_deps[packman][env_name] = dependencies
                         else:
                             if verbose:
                                 print("---- Dependencies NOT obtained. Nothing will be added ----")
+                            self.all_deps[packman][env_name] = {}
                             continue
                     else:
                         if verbose:
@@ -536,30 +556,209 @@ class DepsGetter:
                     print(f"deps_getting error for path: {python_path}: {e}")
                 return dependencies
 
+    def check_library_in_current_venv(self, library_name,verbose=False):
+        if verbose:
+            print("Function check_library_in_current_venv(library_name,verbose=False) started...")
+        try:
+            if verbose:
+                print(f"Attempting to check libriary = {library_name} is in current venv")
+            library_version = version(library_name)
+            if verbose:
+                print(f"{library_name} : {library_version}")
+            r=1
+        except PackageNotFoundError:
+            if verbose:
+                print(f"{library_name} : False")
+            r=0
+        return  r if r else 0
 
+    def count_specifed_venv_deps_is_in_current_venv(self,
+                                    deps = None,
+                                    verbose=False):
+        if deps is None:
+            if verbose:
+                print("set param deps - dictionary of some venv dependencies")
+            return False
+        i, n = 0, 0
+        for library_name in deps:
+            libcheck = self.check_library_in_current_venv(library_name)
+            i += int(libcheck)
+            n += 1
+            #if verbose:
+            #    print(f"Installed: {library_name}"," | Total count of specifed deps dict:",n)
+        if verbose:
+            print(f"Count of specified venv deps in current venv: ",i,
+                  " | Total count of specifed deps dict:",n)
+        if i == n:
+            if verbose:
+                print("Checked vevn equal (or included in)  current")
+        else:
+            if verbose:
+                print("Checked vevn not equal current")
+        return i, n
+
+    def get_current_dependencies(self,verbose=False):
+        dependencies = {}
+        try:
+            for distribution in distributions():
+                dependencies[distribution.metadata['Name']] = distribution.version
+        except Exception as e:
+            if verbose:
+                print("----------------------------------------------------------------------")
+                print("Exception during retreiving data from importlib.metadata.distributions")
+                print(e)
+                print("----------------------------------------------------------------------")
+        return dependencies
+    
+    def count_current_deps_is_in_specifed_venv(self, some_venvs_deps=None,current_deps=None, verbose = False):
+        if some_venvs_deps is None:
+            if verbose:
+                print("Param some_venvs_deps should be specified as dictionary {package:version}")
+                print("False will be returned")
+                print("--------------------------------------------------------------------------------")
+            return False
+
+        if current_deps is None:
+            if verbose:
+                print("Attempting to set param current_deps as dictionary returned by get_current_dependencies")
+            current_deps = self.get_current_dependencies()
+        if current_deps == {}:
+            if verbose:
+                print("Current deps dictionary is empty. False will be returned")
+                print("--------------------------------------------------------------------------------")
+            return False
+        
+        depno = []
+        i, n = 0, 0
+        try:
+            for library_name in current_deps:
+                if library_name in some_venvs_deps \
+                    or library_name.replace('-','_') in some_venvs_deps:
+                    i += 1
+                else:
+                    #print("NOT installed:",library_name)
+                    depno.append(library_name)
+                n += 1
+            if verbose:
+                print("Installed:",i," | Count:",n)
+            if i == n:
+                if verbose:
+                    print("Current vevn equal (or included in) some venv")
+            else:
+                if verbose:
+                    print("Current venev not equal (or not included in) to some vevn")
+        except Exception as e:
+            if verbose:
+                print("--------------------------------------------------------------------------------")
+                print("Exception occured during comparing current venv in some venv:",e)
+                print("--------------------------------------------------------------------------------")
+        return i,n
+
+    def print_dashes(self, symb="-", m=3, n=5, delay=100, increase = 1.3):
+        print("*")
+        for i in range(1,n):
+            print((symb * m)*i)
+            m = int(m*increase)
+            time.sleep(delay / 1000)  # delay is in milliseconds
+
+
+    def check_current_venv_path(self, update_data = False, verbose=False,
+                                symb="-",m=5,n=5,delay=100):
+        self.print_dashes(symb, m,n,delay,increase=1.4)
+        if verbose:
+            print("-------------------------------------------------------------------")
+            print("Function check_current_venv_path started")
+            print("Checking / updating venvs dict grouped_paths...")
+        if self.grouped_paths == {'venv': {}, 'virtualenvs': {}, 'conda': {}}:
+            if verbose:
+                print("Attempting find and get paths to activation scripts")
+            self.get_venvs_paths(verbose=verbose)
+            self.get_conda_envs(verbose=verbose)
+        
+        if self.grouped_paths == {'venv': {}, 'virtualenvs': {}, 'conda': {}}:
+            if verbose:
+                print("Venvs path dict NOT obtained. False will be returned")
+            return False
+        
+        if update_data:
+            if verbose:
+                print("-------------------------------------------------------------------")
+                print("Choosed update_data. Attimpting get all_dependencies...")
+            self.get_all_dependencies(verbose=verbose) # self.all_deps dict processed
+        if self.all_deps is None or self.all_deps == {} \
+            or self.all_deps == {'venv': {}, 'virtualenvs': {}, 'conda': {}}:
+            if verbose:
+                if not update_data:
+                    print("All dependencies dict is empty. Turn on param update_data=True")
+                else:
+                    print("All dependencies dict is empty. Something going wrong...")
+            return False
+        current_deps = self.get_current_dependencies(verbose=verbose)
+        if current_deps is None or current_deps == {}:
+            if verbose:
+                print("Current dependencies is empty! False wil be returned")
+            return False
+        
+        for packman in self.all_deps:
+            if verbose:
+                print("-------------------------------------------------------------------")
+            for venv in self.all_deps[packman]:
+                print("-------------------------------------------------------------------")
+                print(f"Checking ||| packman = {packman} ||| venv = {venv} ||| ---")
+                deps = self.all_deps[packman][venv]
+                if deps is None or deps == {}:
+                    if verbose:
+                        print("checked venv is empty. skiping")
+                    continue
+                
+                deps_in_current = \
+            self.count_specifed_venv_deps_is_in_current_venv(deps,verbose=verbose)
+                current_in_deps = \
+            self.count_current_deps_is_in_specifed_venv(deps,current_deps,verbose=verbose)
+                if deps_in_current and current_in_deps:
+                    icur, ncur = deps_in_current
+                    idep, ndep = current_in_deps
+                else:
+                    continue
+                if icur == ncur and idep == ndep:
+                    if verbose:
+                        print("-------------------------------------------------------------")
+                        print(f"Current venv defined as ||| {venv} |||| packman as ||| {packman} ||| ")
+                        print("Path to activate script (venv folder) is:")
+                        print(self.grouped_paths[packman][venv])
+                        print("path wil be returnred")
+                        print("-------------------------------------------------------------")
+                    return self.grouped_paths[packman][venv]
 
 if __name__ == '__main__':
     deps_getter = DepsGetter()
-    print("Getting venvs paths...")
-    deps_getter.get_venvs_paths(verbose=True)
-    print("Getting conda env list...")
-    deps_getter.get_conda_envs(verbose=True)
-    print("---------------------------------------")
-    print("Checked activate scripts paths:")
-    deps_getter.da.print_dict(deps_getter.grouped_paths)
-    print("---------------------------------------")
-    print("Getting dependencies for some venvs...")
-    prompt_nested_lists = [
-                #['conda', 'myenv'],
-                #['conda', 'base'],
-                ['venv', 'myenv'],
-                ['venv', 'base_python3.11'],
-                ['venv', 'base_python3.9'],
-                #['virtualenvs', 'Buratino']
-            ]
-    deps = deps_getter.get_some_dependencies(prompt_nested_lists=prompt_nested_lists,
-                                             venvs=deps_getter.grouped_paths,
-                                             verbose=True)
-    print("---------------------------------------")
-    print("- get_some_dependencies result ------")
-    deps_getter.da.print_dict(deps)
+    scenario = 'check_current_venv'
+    #scenario = 'get_some_venv'
+
+    if scenario == 'get_some_venv':
+        print("Getting venvs paths...")
+        deps_getter.get_venvs_paths(verbose=True)
+        print("Getting conda env list...")
+        deps_getter.get_conda_envs(verbose=True)
+        print("---------------------------------------")
+        print("Checked activate scripts paths:")
+        deps_getter.da.print_dict(deps_getter.grouped_paths)
+        print("---------------------------------------")
+        print("Getting dependencies for some venvs...")
+        prompt_nested_lists = [
+                    #['conda', 'myenv'],
+                    #['conda', 'base'],
+                    ['venv', 'myenv'],
+                    ['venv', 'base_python3.11'],
+                    ['venv', 'base_python3.9'],
+                    #['virtualenvs', 'Buratino']
+                ]
+        deps = deps_getter.get_some_dependencies(prompt_nested_lists=prompt_nested_lists,
+                                                venvs=deps_getter.grouped_paths,
+                                                verbose=True)
+        print("---------------------------------------")
+        print("- get_some_dependencies result ------")
+        deps_getter.da.print_dict(deps)
+
+    if scenario == 'check_current_venv':
+        path = deps_getter.check_current_venv_path(update_data=True,verbose=True)

@@ -89,6 +89,7 @@ $mount_custom_bashrc \
 -e SPARK_MASTER_IP=$SPARK_MASTER_IP \
 -e SPARK_MASTER=spark://$SPARK_MASTER_IP:7077 \
 -e PYTHONPATH=/work \
+-e PYTHONTRACEMALLOC=1 \
 jupyter/pyspark-notebook start-notebook.sh \
 --NotebookApp.token='' --NotebookApp.notebook_dir='/work'"
 
