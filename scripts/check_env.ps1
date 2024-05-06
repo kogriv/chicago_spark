@@ -4,7 +4,7 @@ param (
     [bool]$FreezeDependencies = $true
 )
 
-function Check-CondaEnvs {
+function Test-CondaEnvs {
     try {
         $envs = (conda env list --json | ConvertFrom-Json).envs
         $result = @()
@@ -25,7 +25,7 @@ function Check-CondaEnvs {
 }
 
 # Проверка активированного окружения venv
-function Check-VenvEnv {
+function Test-VenvEnv {
     $venvPath = $env:VIRTUAL_ENV
     if ($venvPath) {
         $envName = Split-Path $venvPath -Leaf
@@ -90,7 +90,7 @@ function Write-DependenciesToFile {
 }
 
 # Функция для проверки окружений virtualenv
-function Check-VirtualenvEnvs {
+function Test-VirtualenvEnvs {
     param (
         [string]$Path
     )

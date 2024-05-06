@@ -5,14 +5,14 @@ SPARK_MASTER_IP_VAR_NAME = 'SPARK_MASTER_IP'
 spark_master_ip = None
 spark = None
 
-logging.basicConfig(level='DEBUG')
+logging.basicConfig(level='INFO')
 logger = logging.getLogger('chispark_connection')
 
 # Получаем значение переменной окружения SPARK_MASTER_IP
 def get_spark_master_ip():
     spark_master_ip = os.getenv(SPARK_MASTER_IP_VAR_NAME)
     if spark_master_ip:
-        logger.debug(f"spark_master_ip: {spark_master_ip}")
+        logger.info(f"spark_master_ip: {spark_master_ip}")
         return spark_master_ip
     else:
         logger.critical("spark_master_ip NOT EXIST!")
@@ -25,28 +25,28 @@ def spark_app_builder(spark_master_ip= None,
     if spark_master_ip:
         logger.debug('starting import SparkSession')
         from pyspark.sql import SparkSession
-        logger.debug(f"starting building spark app object: {spark_app_name}")
+        logger.info(f"starting building spark app object: {spark_app_name}")
         spark = SparkSession.builder.appName(spark_app_name) \
             .master(f"spark://{spark_master_ip}:7077") \
             .config("spark.executor.cores", "1") \
             .config("spark.task.cpus", 1) \
             .getOrCreate()
-        logger.debug(f"builded spark app object: {spark}")
+        logger.info(f"builded spark app object: {spark}")
         return spark
     else:
-        logger.debug(f"enviroment variable: {SPARK_MASTER_IP_VAR_NAME} not recieved")
+        logger.info(f"enviroment variable: {SPARK_MASTER_IP_VAR_NAME} not recieved")
         return None
 
 def stop_spark_app(spark=spark):
     if spark:
         try:
             # Попытка остановить SparkSession
-            logger.debug(f"attempt to stop SparkSession app object")
+            logger.info(f"attempt to stop SparkSession app object")
             spark.stop()
-            logger.debug(".stop() instruction has been executed")
+            logger.info(".stop() instruction has been executed")
 
             # Попытка выполнить операцию после остановки сессии, чтобы проверить её состояние
-            logger.debug(f"attempt to operate SparkSession app object after stopping")
+            logger.info(f"attempt to operate SparkSession app object after stopping")
             try:
                 spark.sql("SELECT 1")
                 logger.error("Attention: The Spark Session was not stopped correctly.")
@@ -58,12 +58,12 @@ def stop_spark_app(spark=spark):
             logger.error(f"An error occurred while trying to stop SparkSession: {e}")
         return 'error:' + str(e)
     else:
-        logger.debug("attempt to stop NOT EXISTING SparkSession app object")
+        logger.info("attempt to stop NOT EXISTING SparkSession app object")
         return 'empty'
 
 
 
-def main(name):
+def _main(name):
     logger.debug(f'Enter in the main() function: name = {name}')
     logger.debug('****************************************************')
     logger.debug('Attempt to run get_spark_master_ip() function')
@@ -84,4 +84,4 @@ def main(name):
 
     
 if __name__ == '__main__':
-    main(__name__)
+    _main(__name__)
