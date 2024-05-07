@@ -4,9 +4,37 @@ import textwrap
 
 
 class MyLogger(logging.Logger):
+    def __init__(self, name, create_level='INFO', logger=None, enable_logging=True):
+        if logger is None:
+            logger = logging.getLogger(name)
+            logger.setLevel(create_level)
+        self.enable_logging = enable_logging
+        self.parent = logger
+
+    def mylev(self, msg_level, message, *args, **kwargs):
+        if self.enable_logging:
+            self.parent.log(msg_level, message, *args, **kwargs)
+
+    def set_logging_enabled(self, enable_logging):
+        self.enable_logging = enable_logging
+
+class MyLoggerSuper(logging.Logger):
     def __init__(self, name, create_level='INFO', enable_logging=True):
         super().__init__(name, create_level)
         self.enable_logging = enable_logging
+
+        # Если нет обработчиков, добавляем обработчик по умолчанию
+        if not self.handlers:
+            console_handler = logging.StreamHandler()
+            self.addHandler(console_handler)
+
+        # Выводим информацию о текущем уровне каждого обработчика
+        for handler in self.handlers:
+            print(f"Handler: {handler}, Current Level: {handler.level}")
+
+        # Устанавливаем уровень логирования для всех обработчиков
+        for handler in self.handlers:
+            handler.setLevel(create_level)
 
     def mylev(self, msg_level, message, *args, **kwargs):
         if self.enable_logging:
