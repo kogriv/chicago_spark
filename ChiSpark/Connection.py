@@ -1,6 +1,6 @@
 import os
 import logging
-from .enviserv.mylog import MyLogger
+from enviserv.mylog import MyLogger
 
 SPARK_MASTER_IP_VAR_NAME = 'SPARK_MASTER_IP'
 spark_master_ip = None

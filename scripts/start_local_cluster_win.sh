@@ -95,7 +95,7 @@ run_jupyter_command="-d --name jupyter_lab -p 10000:8888 --network spark_network
 $mount_custom_bashrc \
 -e SPARK_MASTER_IP=$SPARK_MASTER_IP \
 -e SPARK_MASTER=spark://$SPARK_MASTER_IP:7077 \
--e PYTHONPATH=/work \
+-e PYTHONPATH=/work:/work/ChiSpark \
 -e PYTHONTRACEMALLOC=1 \
 jupyter/pyspark-notebook start-notebook.sh \
 --NotebookApp.token='' --NotebookApp.notebook_dir='/work'"
