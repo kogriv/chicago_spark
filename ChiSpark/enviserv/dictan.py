@@ -5,7 +5,7 @@ class DictAnalyzer:
     A class for analyzing and comparing dictionaries.
     """
 
-    def __init__(self, logger, llev=30):
+    def __init__(self, logger=None, llev=30):
         """
         Initialize a DictAnalyzer object.
 
@@ -13,6 +13,9 @@ class DictAnalyzer:
             logger: An instance of a logger object.
             llev (int, optional): Logging level. Defaults to 30.
         """
+        if logger is None:
+            from .mylog import MyLogger
+            logger = MyLogger('dictan', 'INFO')
         self.logger = logger
         self.llev = llev
 
