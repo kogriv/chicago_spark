@@ -55,7 +55,7 @@ def get_df_formated(df, sep, round_num, round_str):
                 except ValueError:
                     df.loc[idx, col] = val[:round_str]
 
-def gvf(val, sep, round_num):
+def gvf(val, sep="'", round_num=0):
     return ('{:,.%df}' % round_num).format(val).replace(',', sep)
 
 def tstf():
