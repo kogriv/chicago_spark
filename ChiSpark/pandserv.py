@@ -33,7 +33,8 @@ def get_df_formated(df, sep, round_num, round_str):
                 if val % 1 == 0:
                         val = int(val)
                 if isinstance(val, float):
-                        df.loc[idx, col] = ('{:,.%df}' % round_num).format(val).replace(',', sep)
+                        df.loc[idx, col] = \
+                            ('{:,.%df}' % round_num).format(val).replace(',', sep)
                 elif isinstance(val, int):
                     df.loc[idx, col] = ('{:,.%df}' % 0).format(val).replace(',', sep)
         elif df[col].dtype == 'int64':
@@ -53,3 +54,10 @@ def get_df_formated(df, sep, round_num, round_str):
                         df.loc[idx, col] = ('{:,.%df}' % 0).format(val).replace(',', sep)
                 except ValueError:
                     df.loc[idx, col] = val[:round_str]
+
+def gvf(val, sep, round_num):
+    return ('{:,.%df}' % round_num).format(val).replace(',', sep)
+
+def tstf():
+    print("tstf")
+    return
