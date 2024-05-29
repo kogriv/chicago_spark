@@ -4,7 +4,7 @@ import textwrap
 
 
 class MyLogger(logging.Logger):
-    def __init__(self, name, create_level='INFO', logger=None, enable_logging=True):
+    def __init__(self, name, create_level=  'INFO', logger=None, enable_logging=True):
         if logger is None:
             logger = logging.getLogger(name)
             logger.setLevel(create_level)
