@@ -162,15 +162,27 @@ class SparkApp:
             spark_master_ip = self.spark_master_ip
         if spark_master_ip:
             self.cnlog.mylev(10, 'starting import SparkSession')
-            from pyspark.sql import SparkSession
+            try:
+                from pyspark.sql import SparkSession
+                import pyspark
+                pyspark_version = pyspark.__version__
+                self.cnlog.mylev(20, f'pyspark version: {pyspark_version}')
+            except ImportError as e:
+                self.cnlog.mylev(30, f"Failed to import SparkSession or find pyspark version: {e}")
+                return None
             self.cnlog.mylev(20, f"starting building spark app object: {self.app_name}")
-            spark = SparkSession.builder.appName(self.app_name) \
-                .master(f"spark://{spark_master_ip}:7077") \
-                .config("spark.executor.cores", "1") \
-                .config("spark.task.cpus", 1) \
-                .getOrCreate()
-            self.cnlog.mylev(20, f"built spark app object: {spark}")
-            return spark
+            try:
+                spark = SparkSession.builder.appName(self.app_name) \
+                    .master(f"spark://{spark_master_ip}:7077") \
+                    .config("spark.executor.cores", "1") \
+                    .config("spark.task.cpus", 1) \
+                    .getOrCreate()
+                self.cnlog.mylev(20, f"Spark app object built as: {spark}")
+                self.cnlog.mylev(20, "Spark object can be accessed as the SparkApp_object.spark property")
+                return spark
+            except:
+                self.cnlog.mylev(20, f"environment variable: {self.SPARK_MASTER_IP_VAR_NAME} not received")
+                return None
         else:
             self.cnlog.mylev(20, f"environment variable: {self.SPARK_MASTER_IP_VAR_NAME} not received")
             return None
