@@ -1,0 +1,45 @@
+# Используем официальный образ Spark как базу
+FROM apache/spark:latest
+
+# Переключаемся на пользователя root для установки пакетов
+USER root
+
+# Устанавливаем зависимости для сборки Python
+RUN apt-get update && apt-get install -y \
+    wget \
+    build-essential \
+    libssl-dev \
+    zlib1g-dev \
+    libbz2-dev \
+    libreadline-dev \
+    libsqlite3-dev \
+    curl \
+    libncursesw5-dev \
+    xz-utils \
+    tk-dev \
+    libxml2-dev \
+    libxmlsec1-dev \
+    libffi-dev \
+    liblzma-dev
+
+# Скачиваем и устанавливаем Python 3.11.4
+RUN wget https://www.python.org/ftp/python/3.11.4/Python-3.11.4.tgz && \
+    tar xvf Python-3.11.4.tgz && \
+    cd Python-3.11.4 && \
+    ./configure --enable-optimizations && \
+    make -j 8 && \
+    make altinstall && \
+    ln -s /usr/local/bin/python3.11 /usr/local/bin/python3 && \
+    cd .. && \
+    rm -rf Python-3.11.4 Python-3.11.4.tgz
+
+# Устанавливаем pip и необходимые зависимости
+RUN python3.11 -m ensurepip && \
+    python3.11 -m pip install --upgrade pip && \
+    python3.11 -m pip install pyspark
+
+# Устанавливаем переменную окружения для Python
+ENV PYSPARK_PYTHON=/usr/local/bin/python3.11
+
+# Возвращаемся к пользователю по умолчанию (если необходимо)
+USER $NB_UID

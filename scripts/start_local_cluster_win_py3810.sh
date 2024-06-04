@@ -22,21 +22,21 @@ fi
 
 # anothe one pc
 PATH_TO_PROJECT_DIR=/mnt/c/Users/Ivan/Documents/Pro/chicago_spark/
-#PATH_TO_BASH_START=/mnt/c/Users/Ivan/Documents/Pro/chicago_spark/scripts/bash_start.sh
+PATH_TO_BASH_START=/mnt/c/Users/Ivan/Documents/Pro/chicago_spark/scripts/bash_start.sh
 
 # PATH_TO_PROJECT_DIR=/home/d/pro/chicago_spark
 # PATH_TO_BASH_START=/home/d/pro/chicago_spark/scripts/bash_start.sh
 
 # PATH_TO_PROJECT_DIR="C:/Users/user/Documents/Pro/chicago_spark"
 
-#CUSTOM_JUPY_IMAGE_NAME="jupyspark:latest"
-#DOCKERFILE_PATH="$PATH_TO_PROJECT_DIR/scripts/Dockerfile.py3810"
+CUSTOM_JUPY_IMAGE_NAME="jupyspark:latest"
+DOCKERFILE_PATH="$PATH_TO_PROJECT_DIR/scripts/Dockerfile.py3810"
 
 MEMORY_PER_WORKER='2g'
 CORES_PER_WORKER=1
 
-#echo "Building custom Docker image..."
-#docker build -t $CUSTOM_JUPY_IMAGE_NAME -f $DOCKERFILE_PATH .
+echo "Building custom Docker image..."
+docker build -t $CUSTOM_JUPY_IMAGE_NAME -f $DOCKERFILE_PATH .
 
 # Check and create local docker network named "spark_network" if it doesn't exist
 if ! docker network ls | grep -q spark_network; then
@@ -99,7 +99,7 @@ if [ -f "$PATH_TO_BASH_START" ]; then
   echo "Custom .bashrc exists"
   mount_custom_bashrc="-v $PATH_TO_BASH_START:/home/jovyan/.bashrc"
 else
-  echo "Custom PATH_TO_BASH_START to .bashrc NOT exists"
+  echo "Custom .bashrc NOT exists"
   #mount_custom_bashrc=""
 fi
 
@@ -111,11 +111,8 @@ $mount_custom_bashrc \
 -e SPARK_MASTER=spark://$SPARK_MASTER_IP:7077 \
 -e PYTHONPATH=/work:/work/ChiSpark \
 -e PYTHONTRACEMALLOC=1 \
-jupyter/pyspark-notebook start-notebook.sh \
+$CUSTOM_JUPY_IMAGE_NAME start-notebook.sh \
 --NotebookApp.token='' --NotebookApp.notebook_dir='/work'"
-
-# $CUSTOM_JUPY_IMAGE_NAME start-notebook.sh \
-
 
 #docker cp .condarc jupyter_lab:/opt/conda/
 
@@ -123,10 +120,12 @@ echo "Jupyter container run command:"
 echo "$run_jupyter_command"
 # echo "After printing Jupyter container run command:"
 run_container "jupyter_lab" "$run_jupyter_command"
+#docker exec jupyter_lab /bin/bash -c "export PATH=/usr/local/spark/bin:/usr/bin:$PATH"
+
 
 echo "*********************************************************"
 echo "Creating or starting SPARK cluster is finished"
 echo 'YOUR SPARK MASTER NODE IP IS:' $SPARK_MASTER_IP
 echo 'YOU CAN ACCESS JUPYTER LAB VIA: http://localhost:10000'
-#echo 'RUN in jupyter_lab "export PATH=/usr/local/spark/bin:/usr/bin:$PATH"'
+echo 'RUN in jupyter_lab "export PATH=/usr/local/spark/bin:/usr/bin:$PATH"'
 echo "*********************************************************"

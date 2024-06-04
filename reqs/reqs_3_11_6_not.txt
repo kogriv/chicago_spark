@@ -1,0 +1,12 @@
+libmambapy
+mamba==1.5.2
+matplotlib==3.8.0
+networkx==3.2
+numexpr==2.8.7
+scikit-image==0.22.0
+scipy==1.11.3
+tables==3.9.1
+tables==3.9.0
+tifffile==2023.9.26
+
+truststore==0.8.0

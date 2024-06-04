@@ -98,3 +98,60 @@ cоответствует самой команде grep, которую вы и
 
 Этот процесс grep существует только в течение очень короткого времени, пока выполняется поиск. После отображения результатов команда grep завершается, так что нет необходимости его останавливать или убивать. То, что вы видите, это просто моментальный снимок процесса grep во время его выполнения командой ps.
 
+## ядра юпитера
+Для того, чтобы пользоваться нужной версией питона, добавьте путь в переменную окружения:
+```bash
+export PATH=export PATH=/usr/local/spark/bin:/usr/bin:$PATH:/usr/bin:$PATH
+```
+
+При этом вызов `python` будет по прежнему открывать интерпритатор контейнера по умолчанию (например 3.11.6). Вызов `python3` откроет инетрпритатор из `PATH=/usr/local/spark/bin` (Python 3.8.10). Также и менеджер пакетов - использование `pip` будет устанавливать пакеты для интерпритатора по умолчанию. ЕСли нужна среда 3.8.10, используйте `pip3`.
+
+Если модуль `ipykernel` не установлен для вашей версии `Python 3.8.10`, вы получите сообщение об ошибке "No module named ipykernel". Для решения этой проблемы вам нужно установить ipykernel для Python 3.8.10.
+```bash
+pip3 install ipykernel
+```
+
+После установки модуля ipykernel вы сможете использовать команду для добавления ядра в Jupyter с именем python38.
+```bash
+python3 -m ipykernel install --user --name=python38
+```
+
+Если вы используете виртуальное окружение Python, то активация среды происходит с помощью команды source или . (точка) в зависимости от вашей операционной системы и используемого оболочки.
+```bash
+source /путь_к_вашей_среде/bin/activate
+```
+
+Вы можете проверить доступные ядра в Jupyter, выполнив следующую команду в терминале:
+```bash
+jupyter kernelspec list
+```
+
+При установке нового ядра IPython вам придется установить все необходимые библиотеки и зависимости для этого ядра.
+```bash
+pip3 install -r requirements.txt
+```
+
+При установке
+```bash
+python3 -m ipykernel install --user --name=python_38
+```
+Может возникнуть ошибка:
+```bash
+...
+ImportError: 
+IPython 8.13+ supports Python 3.9 and above, following NEP 29.
+IPython 8.0-8.12 supports Python 3.8 and above, following NEP 29.
+When using Python 2.7, please install IPython 5.x LTS Long Term Support version.
+Python 3.3 and 3.4 were supported up to IPython 6.x.
+Python 3.5 was supported with IPython 7.0 to 7.9.
+Python 3.6 was supported with IPython up to 7.16.
+Python 3.7 was still supported with the 7.x branch.
+...
+```
+Проблема заключается в том, что установленная версия IPython не поддерживает Python 3.8. Нужно установить совместимую версию IPython.
+
+Установим IPython версии 8.0-8.12, которая поддерживает Python 3.8.
+```bash
+pip3 install ipython==8.12
+```
+

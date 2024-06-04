@@ -29,14 +29,19 @@ PATH_TO_PROJECT_DIR=/mnt/c/Users/Ivan/Documents/Pro/chicago_spark/
 
 # PATH_TO_PROJECT_DIR="C:/Users/user/Documents/Pro/chicago_spark"
 
-#CUSTOM_JUPY_IMAGE_NAME="jupyspark:latest"
-#DOCKERFILE_PATH="$PATH_TO_PROJECT_DIR/scripts/Dockerfile.py3810"
+CUSTOM_SPARK_IMAGE_NAME="spark:python3114"
+DOCKERFILE_PATH="$PATH_TO_PROJECT_DIR/scripts/Dockerfile.py3114"
 
 MEMORY_PER_WORKER='2g'
 CORES_PER_WORKER=1
 
-#echo "Building custom Docker image..."
-#docker build -t $CUSTOM_JUPY_IMAGE_NAME -f $DOCKERFILE_PATH .
+echo "Building custom Docker image $CUSTOM_SPARK_IMAGE_NAME for SPARK cluster with py 3.11.4..."
+if [[ "$(docker images -q $CUSTOM_SPARK_IMAGE_NAME 2> /dev/null)" == "" ]]; then
+  echo "Image $CUSTOM_SPARK_IMAGE_NAME not found. Building the custom Docker image for SPARK cluster with Python 3.11.4..."
+  docker build -t $CUSTOM_SPARK_IMAGE_NAME -f $DOCKERFILE_PATH .
+else
+  echo "Image $CUSTOM_SPARK_IMAGE_NAME already exists. Skipping build."
+fi
 
 # Check and create local docker network named "spark_network" if it doesn't exist
 if ! docker network ls | grep -q spark_network; then
@@ -69,7 +74,7 @@ run_container() {
 run_container "spark_master" \
   "-d -p 8080:8080 -p 7077:7077 --name spark_master \
   --network spark_network -v $PATH_TO_PROJECT_DIR:/work:rw \
-  apache/spark:latest /opt/spark/bin/spark-class \
+  $CUSTOM_SPARK_IMAGE_NAME /opt/spark/bin/spark-class \
   org.apache.spark.deploy.master.Master -h spark_master"
 
 
@@ -84,7 +89,7 @@ for i in {1..4}; do
     -e SPARK_WORKER_MEMORY=$MEMORY_PER_WORKER \
     -e SPARK_WORKER_CORES=$CORES_PER_WORKER \
     -v $PATH_TO_PROJECT_DIR:/work:rw \
-    apache/spark:latest /opt/spark/bin/spark-class \
+    $CUSTOM_SPARK_IMAGE_NAME /opt/spark/bin/spark-class \
     org.apache.spark.deploy.worker.Worker spark://$SPARK_MASTER_IP:7077"
 done
 
@@ -99,7 +104,7 @@ if [ -f "$PATH_TO_BASH_START" ]; then
   echo "Custom .bashrc exists"
   mount_custom_bashrc="-v $PATH_TO_BASH_START:/home/jovyan/.bashrc"
 else
-  echo "Custom PATH_TO_BASH_START to .bashrc NOT exists"
+  echo "Custom .bashrc NOT exists"
   #mount_custom_bashrc=""
 fi
 
@@ -111,11 +116,8 @@ $mount_custom_bashrc \
 -e SPARK_MASTER=spark://$SPARK_MASTER_IP:7077 \
 -e PYTHONPATH=/work:/work/ChiSpark \
 -e PYTHONTRACEMALLOC=1 \
-jupyter/pyspark-notebook start-notebook.sh \
+jupyter/pyspark-notebook:latest start-notebook.sh \
 --NotebookApp.token='' --NotebookApp.notebook_dir='/work'"
-
-# $CUSTOM_JUPY_IMAGE_NAME start-notebook.sh \
-
 
 #docker cp .condarc jupyter_lab:/opt/conda/
 
@@ -123,6 +125,8 @@ echo "Jupyter container run command:"
 echo "$run_jupyter_command"
 # echo "After printing Jupyter container run command:"
 run_container "jupyter_lab" "$run_jupyter_command"
+#docker exec jupyter_lab /bin/bash -c "export PATH=/usr/local/spark/bin:/usr/bin:$PATH"
+
 
 echo "*********************************************************"
 echo "Creating or starting SPARK cluster is finished"
