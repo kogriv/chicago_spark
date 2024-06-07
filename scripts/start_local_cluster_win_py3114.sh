@@ -21,7 +21,7 @@ fi
 # PATH_TO_BASH_START=/mnt/c/Users/g/Documents/Pro/chicago_spark/scripts/bash_start.sh
 
 # anothe one pc
-PATH_TO_PROJECT_DIR=/mnt/c/Users/Ivan/Documents/Pro/chicago_spark/
+PATH_TO_PROJECT_DIR=/mnt/c/Users/Ivan/Documents/Pro/chicago_spark
 #PATH_TO_BASH_START=/mnt/c/Users/Ivan/Documents/Pro/chicago_spark/scripts/bash_start.sh
 
 # PATH_TO_PROJECT_DIR=/home/d/pro/chicago_spark
@@ -29,7 +29,11 @@ PATH_TO_PROJECT_DIR=/mnt/c/Users/Ivan/Documents/Pro/chicago_spark/
 
 # PATH_TO_PROJECT_DIR="C:/Users/user/Documents/Pro/chicago_spark"
 
-CUSTOM_SPARK_IMAGE_NAME="spark:python3114"
+# Путь к файлу зависимостей на воркерах
+#WORKER_REQS_PATH="$PATH_TO_PROJECT_DIR/reqs/reqs_workers.txt"
+#WORKER_REQS_PATH="/reqs/reqs_workers.txt"
+
+CUSTOM_SPARK_IMAGE_NAME="spark_cluster:python3114"
 DOCKERFILE_PATH="$PATH_TO_PROJECT_DIR/scripts/Dockerfile.py3114"
 
 MEMORY_PER_WORKER='2g'
@@ -38,7 +42,13 @@ CORES_PER_WORKER=1
 echo "Building custom Docker image $CUSTOM_SPARK_IMAGE_NAME for SPARK cluster with py 3.11.4..."
 if [[ "$(docker images -q $CUSTOM_SPARK_IMAGE_NAME 2> /dev/null)" == "" ]]; then
   echo "Image $CUSTOM_SPARK_IMAGE_NAME not found. Building the custom Docker image for SPARK cluster with Python 3.11.4..."
-  docker build -t $CUSTOM_SPARK_IMAGE_NAME -f $DOCKERFILE_PATH .
+  #echo "Workers requirements path is $WORKER_REQS_PATH"
+  #echo "result for comand ls $WORKER_REQS_PATH is:"
+  #ls $WORKER_REQS_PATH
+  docker build -t $CUSTOM_SPARK_IMAGE_NAME \
+               -f $DOCKERFILE_PATH .
+              
+
 else
   echo "Image $CUSTOM_SPARK_IMAGE_NAME already exists. Skipping build."
 fi

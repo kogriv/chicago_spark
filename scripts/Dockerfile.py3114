@@ -33,10 +33,14 @@ RUN wget https://www.python.org/ftp/python/3.11.4/Python-3.11.4.tgz && \
     cd .. && \
     rm -rf Python-3.11.4 Python-3.11.4.tgz
 
+COPY reqs_workers.txt /reqs_workers.txt
+
 # Устанавливаем pip и необходимые зависимости
 RUN python3.11 -m ensurepip && \
-    python3.11 -m pip install --upgrade pip && \
-    python3.11 -m pip install pyspark
+    python3.11 -m pip install --upgrade pip
+    
+RUN python3.11 -m pip install -r /reqs_workers.txt
+    
 
 # Устанавливаем переменную окружения для Python
 ENV PYSPARK_PYTHON=/usr/local/bin/python3.11
