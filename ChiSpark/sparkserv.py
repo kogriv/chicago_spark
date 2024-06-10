@@ -178,7 +178,9 @@ class SparkApp:
                     .config("spark.task.cpus", 1) \
                     .getOrCreate()
                 self.cnlog.mylev(20, f"Spark app object built as: {spark}")
+                self.cnlog.mylev(20, "==================================================================")
                 self.cnlog.mylev(20, "Spark object can be accessed as the SparkApp_object.spark property")
+                self.cnlog.mylev(20, "==================================================================")
                 return spark
             except:
                 self.cnlog.mylev(20, f"environment variable: {self.SPARK_MASTER_IP_VAR_NAME} not received")
