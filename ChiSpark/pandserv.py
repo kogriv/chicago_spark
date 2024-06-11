@@ -1,3 +1,5 @@
+import pandas as pd
+
 def get_column_types(dataframe):
     """
     Define pandas data types
