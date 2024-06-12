@@ -146,7 +146,7 @@ class SparkApp:
         
         if spark_master_ip is None:
             self.spark_master_ip = self.get_spark_master_ip()
-        self.spark = self.build_spark_app(self.spark_master_ip)
+        self.build_spark_app(self.spark_master_ip)
 
     def get_spark_master_ip(self):
         spark_master_ip = os.getenv(self.SPARK_MASTER_IP_VAR_NAME)
@@ -181,9 +181,10 @@ class SparkApp:
                 self.cnlog.mylev(20, "==================================================================")
                 self.cnlog.mylev(20, "Spark object can be accessed as the SparkApp_object.spark property")
                 self.cnlog.mylev(20, "==================================================================")
+                self.spark = spark
                 return spark
             except:
-                self.cnlog.mylev(20, f"environment variable: {self.SPARK_MASTER_IP_VAR_NAME} not received")
+                self.cnlog.mylev(20, f"building spark app NOT executed")
                 return None
         else:
             self.cnlog.mylev(20, f"environment variable: {self.SPARK_MASTER_IP_VAR_NAME} not received")
@@ -195,7 +196,7 @@ class SparkApp:
                 self.cnlog.mylev(20, "attempt to stop SparkSession app object")
                 self.spark.stop()
                 self.cnlog.mylev(20, ".stop() instruction has been executed")
-                #self.spark = None
+                self.spark = None
                 self.cnlog.mylev(20, "attempt to create new SparkSession app object after stopping")
                 try:
                     """
