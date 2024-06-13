@@ -17,11 +17,11 @@ fi
 # PATH_TO_BASH_START=/mnt/c/Users/user/Documents/Pro/chicago_spark/scripts/bash_start.sh
 
 # some pc
-PATH_TO_PROJECT_DIR=/mnt/c/Users/g/Documents/Pro/chicago_spark/
+#PATH_TO_PROJECT_DIR=/mnt/c/Users/g/Documents/Pro/chicago_spark/
 # PATH_TO_BASH_START=/mnt/c/Users/g/Documents/Pro/chicago_spark/scripts/bash_start.sh
 
-# anothe one pc
-#PATH_TO_PROJECT_DIR=/mnt/c/Users/Ivan/Documents/Pro/chicago_spark
+# another one pc
+PATH_TO_PROJECT_DIR=/mnt/c/Users/Ivan/Documents/Pro/chicago_spark
 #PATH_TO_BASH_START=/mnt/c/Users/Ivan/Documents/Pro/chicago_spark/scripts/bash_start.sh
 
 # PATH_TO_PROJECT_DIR=/home/d/pro/chicago_spark
@@ -119,7 +119,7 @@ else
 fi
 
 # Run Jupyter Lab
-run_jupyter_command="-d --name jupyter_lab -p 10000:8888 --network spark_network --user root \
+run_jupyter_command="-d --name jupyter_lab -p 10000:8888 -p 4040:4040 --network spark_network --user root \
 -v $PATH_TO_PROJECT_DIR:/work:rw \
 $mount_custom_bashrc \
 -e SPARK_MASTER_IP=$SPARK_MASTER_IP \
