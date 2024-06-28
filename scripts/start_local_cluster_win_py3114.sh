@@ -13,7 +13,7 @@ fi
 # Full path to project directory
 # We mount it to docker containers
 # So they will se the content in that directory
-# PATH_TO_PROJECT_DIR=/mnt/c/Users/user/Documents/Pro/chicago_spark/
+PATH_TO_PROJECT_DIR=/mnt/c/Users/user/Documents/Pro/chicago_spark/
 # PATH_TO_BASH_START=/mnt/c/Users/user/Documents/Pro/chicago_spark/scripts/bash_start.sh
 
 # some pc
@@ -25,7 +25,7 @@ fi
 #PATH_TO_BASH_START=/mnt/c/Users/Ivan/Documents/Pro/chicago_spark/scripts/bash_start.sh
 
 # another one pc
-PATH_TO_PROJECT_DIR=/mnt/c/Users/6x1080/Documents/Pro/chicago_spark
+#PATH_TO_PROJECT_DIR=/mnt/c/Users/6x1080/Documents/Pro/chicago_spark
 #PATH_TO_BASH_START=/mnt/c/Users/Ivan/Documents/Pro/chicago_spark/scripts/bash_start.sh
 
 # PATH_TO_PROJECT_DIR=/home/d/pro/chicago_spark
