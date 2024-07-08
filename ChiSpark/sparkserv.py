@@ -1,3 +1,5 @@
+from io import StringIO
+from contextlib import redirect_stdout
 import os
 import logging
 from enviserv.mylog import MyLogger
@@ -253,6 +255,65 @@ class SparkApp:
         self.cnlog.mylev(10, 'Attempt to run stop_spark_app() function')
         stop_msg = self.stop_spark_app()
         self.cnlog.mylev(10, f"Result is: {stop_msg}")
+
+    def test_spark_functionality(self):
+        # Проверка, что SparkSession была создана
+        assert self.spark is not None, "Failed to create Spark session"
+        print("Spark session created successfully.")
+
+        # Данные для DataFrame
+        data = [("Alice", 10), ("Bob", 20)]
+        columns = ["name", "age"]
+
+        # Создание DataFrame
+        df = self.spark.createDataFrame(data, columns)
+        assert df is not None, "Failed to create DataFrame"
+        print("DataFrame created successfully.")
+
+        # Присвоение псевдонимов столбцам
+        df_with_alias = df.select(df["name"].alias("student_name"), df["age"].alias("student_age"))
+        assert df_with_alias is not None, "Failed to create alias DataFrame"
+        print("Alias DataFrame created successfully.")
+
+        # Преобразование DataFrame в формат для проверки
+        result = df_with_alias.collect()
+        expected_result = [("Alice", 10), ("Bob", 20)]
+        assert result == expected_result, f"DataFrame does not match expected result: {result} != {expected_result}"
+        print("DataFrame data matches expected result.")
+
+        dff = df_with_alias.select("*")  # Select all columns to create a new DataFrame
+        #dff.collect()
+        #dff.cache()
+        # Захват вывода df_with_alias.show()
+        f = StringIO()
+        with redirect_stdout(f):
+            df_with_alias.show()
+        out = f.getvalue()
+
+        # Ожидаемый вывод
+        expected_output = (
+            "+------------+-----------+\n"
+            "|student_name|student_age|\n"
+            "+------------+-----------+\n"
+            "|       Alice|         10|\n"
+            "|         Bob|         20|\n"
+            "+------------+-----------+\n"
+        )
+
+        # Разделение вывода на строки и удаление лишних пробелов
+        out_lines = [line.strip() for line in out.strip().split("\n")]
+        expected_lines = [line.strip() for line in expected_output.strip().split("\n")]
+
+        # Построчное сравнение
+        for out_line, expected_line in zip(out_lines, expected_lines):
+            assert out_line == expected_line, f"Line does not match: {out_line} != {expected_line}"
+
+        dff.show()
+        print("DataFrame show output matches expected output.")
+
+        # Освобождение ресурсов
+        del dff
+        del df
 
 
 if __name__ == '__main__':
