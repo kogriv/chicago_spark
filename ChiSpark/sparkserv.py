@@ -311,6 +311,18 @@ class SparkApp:
         dff.show()
         print("DataFrame show output matches expected output.")
 
+        ooo = \
+        """
+=======use======================
+*      ____              __    *
+*     / __/__  ___ _____/ /__  *
+*    _\ \/ _ \/ _ `/ __/  '_/  *
+*   /__ / .__/\_,_/_/ /_/\_\   *
+*      /_/                     * 
+================================
+        """
+
+        print(ooo)
         # Освобождение ресурсов
         del dff
         del df
