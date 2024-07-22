@@ -331,3 +331,15 @@ class SparkApp:
 if __name__ == '__main__':
     app = SparkApp()
     app.test_app()
+
+
+# def custom_scaler():
+    # масштабируем в лоб
+    # mean_and_std_cols=[c for col in features_list for c in 
+    # (f.mean(col).alias(f"{col}_mean"),f.stddev(col).alias(f"{col}_std"))]
+    
+    # mean_and_std = geo_train.select(mean_and_std_cols).first()
+    # scaled_cols=[((f.col(col) - mean_and_std[f"{col}_mean"])
+    #     /mean_and_std[f"{col}_std"]).alias(f"{col}_scaled") for col in features_list]
+    # scaled_geo_train = geo_train.select(geo_train.columns + scaled_cols)
+    # scaled_geo_test = geo_test.select(geo_test.columns + scaled_cols)
