@@ -1,3 +1,5 @@
+from io import StringIO
+from contextlib import redirect_stdout
 import os
 import logging
 from enviserv.mylog import MyLogger
@@ -254,7 +256,90 @@ class SparkApp:
         stop_msg = self.stop_spark_app()
         self.cnlog.mylev(10, f"Result is: {stop_msg}")
 
+    def test_spark_functionality(self):
+        # Проверка, что SparkSession была создана
+        assert self.spark is not None, "Failed to create Spark session"
+        print("Spark session created successfully.")
+
+        # Данные для DataFrame
+        data = [("Alice", 10), ("Bob", 20)]
+        columns = ["name", "age"]
+
+        # Создание DataFrame
+        df = self.spark.createDataFrame(data, columns)
+        assert df is not None, "Failed to create DataFrame"
+        print("DataFrame created successfully.")
+
+        # Присвоение псевдонимов столбцам
+        df_with_alias = df.select(df["name"].alias("student_name"), df["age"].alias("student_age"))
+        assert df_with_alias is not None, "Failed to create alias DataFrame"
+        print("Alias DataFrame created successfully.")
+
+        # Преобразование DataFrame в формат для проверки
+        result = df_with_alias.collect()
+        expected_result = [("Alice", 10), ("Bob", 20)]
+        assert result == expected_result, f"DataFrame does not match expected result: {result} != {expected_result}"
+        print("DataFrame data matches expected result.")
+
+        dff = df_with_alias.select("*")  # Select all columns to create a new DataFrame
+        #dff.collect()
+        #dff.cache()
+        # Захват вывода df_with_alias.show()
+        f = StringIO()
+        with redirect_stdout(f):
+            df_with_alias.show()
+        out = f.getvalue()
+
+        # Ожидаемый вывод
+        expected_output = (
+            "+------------+-----------+\n"
+            "|student_name|student_age|\n"
+            "+------------+-----------+\n"
+            "|       Alice|         10|\n"
+            "|         Bob|         20|\n"
+            "+------------+-----------+\n"
+        )
+
+        # Разделение вывода на строки и удаление лишних пробелов
+        out_lines = [line.strip() for line in out.strip().split("\n")]
+        expected_lines = [line.strip() for line in expected_output.strip().split("\n")]
+
+        # Построчное сравнение
+        for out_line, expected_line in zip(out_lines, expected_lines):
+            assert out_line == expected_line, f"Line does not match: {out_line} != {expected_line}"
+
+        dff.show()
+        print("DataFrame show output matches expected output.")
+
+        ooo = \
+        """
+=======use======================
+*      ____              __    *
+*     / __/__  ___ _____/ /__  *
+*    _\ \/ _ \/ _ `/ __/  '_/  *
+*   /__ / .__/\_,_/_/ /_/\_\   *
+*      /_/                     * 
+================================
+        """
+
+        print(ooo)
+        # Освобождение ресурсов
+        del dff
+        del df
+
 
 if __name__ == '__main__':
     app = SparkApp()
     app.test_app()
+
+
+# def custom_scaler():
+    # масштабируем в лоб
+    # mean_and_std_cols=[c for col in features_list for c in 
+    # (f.mean(col).alias(f"{col}_mean"),f.stddev(col).alias(f"{col}_std"))]
+    
+    # mean_and_std = geo_train.select(mean_and_std_cols).first()
+    # scaled_cols=[((f.col(col) - mean_and_std[f"{col}_mean"])
+    #     /mean_and_std[f"{col}_std"]).alias(f"{col}_scaled") for col in features_list]
+    # scaled_geo_train = geo_train.select(geo_train.columns + scaled_cols)
+    # scaled_geo_test = geo_test.select(geo_test.columns + scaled_cols)
