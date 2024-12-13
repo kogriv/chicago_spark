@@ -4,3 +4,5 @@ data/
 environ/
 ChiSpark/__pycache__/
 ChiSpark/enviserv/__pycache__/
+.replit
+replit.nix
